@@ -69,12 +69,12 @@ Before writing UI code, lock in five concrete decisions:
         clear typographic hierarchy, fluid gesture sheets).
     *   *Video Game UI*: Diegetic / World-Integrated Framing, High-Contrast
         Tactical HUD, Stylized / Illustrative Menu, or Crisp Retro-Modern.
-3.  **60-30-10 Color & Undertone Plan**: Choose tinted neutrals matched to the
-    domain undertone (warm paper/espresso vs. cool zinc/graphite vs. mineral
-    sage—never raw `#000000` or cold `slate` paired with warm accents). Reserve
-    **one** primary focal accent (10%) with contrast-verified foreground ink
-    (never white text on bright amber/lime/cyan), and lock green/amber/red
-    strictly to real status/vitals.
+3.  **60-30-10 Color & Restraint Plan**: Use clean, high-clarity neutrals
+    (crisp charcoal `#0E1013`–`#16191E` or warm alabaster `#FAF8F5`—avoid
+    murky greenish/brownish dark surfaces) and **at most ONE focal accent**
+    (10%) with contrast-verified foreground ink. Never put 3+ saturated neon
+    status/rarity colors (`#4ade80` + `#38bdf8` + `#fb7185` + `#e09f3e`) on
+    screen together—keep secondary tags muted/tonal.
 4.  **Typography Pairing & Font Loading**: Separate **Display Font** (headings
     only, max 1–8 words) from **UI/Body Font** (legible everywhere, never put
     ornate/fantasy/display faces on `< 16px` copy or dense tables) + **Mono**
@@ -82,8 +82,11 @@ Before writing UI code, lock in five concrete decisions:
     (`line-height >= 1.12` on headings), actually import every declared webfont,
     use calibrated `400/500/600` weight contrast instead of `font-bold`
     everywhere, and apply `tabular-nums` to all metrics, prices, and HUD timers.
-5.  **Layout & Input Grammar**: Select a structure built for the medium and
-    input devices (mouse/keyboard, touch, or gamepad). See
+5.  **Open User-Friendly Layout & Custom SVG Plan**: Structure the viewport as
+    clean, open split panes separated by hairline dividers—never nested boxes
+    inside boxes, never duplicate the same items in stacked sections, and never
+    clutter primary headers with QA/debug state toggles. Plan custom inline
+    `<svg>` icons/silhouettes for visual anchors (items, nav, empty states). See
     [Layout & Domain Archetypes](./references/layout-and-domain-archetypes.md).
 
 ### Phase 3: Build with Anti-Slop Discipline
@@ -97,34 +100,39 @@ Consult the deep references matched to your task:
 
 #### Non-Negotiable Red Lines (Never Ship These)
 
-1.  **No AI Color Clichés or Broken Contrast**: Never default to `#0f172a`/`#09090b`
-    + indigo/purple/pink gradients, raw `#000000` backgrounds, muddy neon
-    translucent boxes (`bg-purple-500/20 border-purple-500/40`), or `text-white`
-    on bright yellow/amber/lime/cyan/emerald-400 buttons. Always harmonize
-    neutral undertones with the accent.
+1.  **No AI Color Clichés, Murky Tints, or Neon Rainbow Overload**: Never default
+    to `#0f172a` + indigo/purple/pink gradients, raw `#000000`, murky
+    green-black/brown-black midtones, muddy neon boxes (`bg-purple-500/20`),
+    or `text-white` on bright yellow/amber/lime/cyan/emerald-400. Never mix 3+
+    saturated neon status/rarity colors (`#4ade80` + `#38bdf8` + `#fb7185` +
+    `#e09f3e`) on one screen—keep secondary tags understated and tonal.
 2.  **No Typography Slop or Unloaded Fonts**: Never use unstyled Arial/Times,
     blind `Inter`+`font-bold` monotony, or display/fantasy/sci-fi fonts on
     long body copy or dense tables. Never declare a webfont without actually
     importing it (`<link>` / `@import` / `@fontsource`), and never clip Turkish
     diacritics (`İ, Ş, Ğ`) with `leading-none`.
-3.  **No "Carditis" (Boxes Inside Boxes)**: Do not wrap every group of labels or
-    stats in identical rounded-2xl shadowed cards. Use whitespace, structural
-    split panes, and hairline dividers (`1px solid`).
-4.  **No Rainbow Icon Badges**: Never color-code unrelated tiles with arbitrary
-    pastel blue/purple/green/orange icon circles.
-5.  **No Sparkle / Emoji Crutches**: Never put `✨`, `🚀`, `⚡`, or `Sparkles`
-    icons on buttons, headings, or badges as generic decoration.
-6.  **No Buzzword Copy or Toy Data**: Banish *"Supercharge"*, *"Seamless"*,
+3.  **No "Carditis" or Cluttered Non-UX Layouts**: Never stack bordered boxes
+    inside bordered boxes, duplicate the same items in stacked sections, or
+    pollute user-facing headers with QA/debug state-simulator buttons. Use open
+    canvases, clean split panes with `1px` hairline dividers, clear visual
+    focal priority, and generous breathing room.
+4.  **Write Bespoke Inline `<svg>` Icons & Silhouettes (No Text-Only Stubs or Emojis)**:
+    Never use `✨`, `🚀`, `⚡`, Unicode icon surrogates (`📦`, `🛡️`), or
+    bare text-only rectangles where visual recognition helps. Author clean,
+    bespoke inline `<svg>` icons and domain silhouettes (e.g., item/weapon/armor
+    art, nav glyphs, empty-state linework) using `currentColor` and consistent
+    `stroke-width: 1.5–1.75`. Never put rainbow pastel badges around icons.
+5.  **No Buzzword Copy or Toy Data**: Banish *"Supercharge"*, *"Seamless"*,
     *"Elevate"*, *"Next-gen"*, *"Acme Corp"*, *"John Doe"*, and synthetic
     `+20.1%` filler stats. Use domain-authentic copy and varied, realistic data.
-7.  **No Broken Numeric Alignment**: Every price, counter, KPI, HP/timer/score,
+6.  **No Broken Numeric Alignment**: Every price, counter, KPI, HP/timer/score,
     percentage, and table number must use `tabular-nums`.
-8.  **No Medium Mismatch**:
+7.  **No Medium Mismatch**:
     *   Desktop apps must not look like oversized web landing pages.
     *   Mobile apps must not cram desktop tables or put key actions out of thumb reach.
     *   Game UIs must not look like Tailwind SaaS cards, clutter center-screen
         gameplay, or break gamepad/D-pad focus navigation.
-9.  **No Single-State Prototypes**: Every view must handle empty, loading,
+8.  **No Single-State Prototypes**: Every view must handle empty, loading,
     error, long-text truncation (`min-w-0`), keyboard/gamepad focus, and
     target viewport/aspect-ratio scaling.
 

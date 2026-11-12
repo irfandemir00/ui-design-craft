@@ -57,7 +57,7 @@ characteristic AI-generated UI clichés.
 
 | AI Slop Pattern | Why It Looks Synthetic | Intentional Replacement |
 | :--- | :--- | :--- |
-| `✨` / `🚀` / `⚡` emojis or `Sparkles` icon in buttons and headings | Screams "AI wrote this" | Plain, crisp action labels (`Generate Draft`, `Run Audit`, `Create Project`); use functional icons only for navigation, actions, or status |
+| `✨` / `🚀` / `⚡` / `📦` / `🛡️` Unicode emojis or empty text-only boxes | Looks amateurish and strips instant visual recognition | Author crisp, bespoke inline `<svg>` icons and domain silhouettes (items, navigation, empty states) with `currentColor` and consistent `stroke-width: 1.5–1.75` |
 | Pill badges (`rounded-full px-2.5 py-0.5`) on every single tag, category, and metadata field | Badge soup makes real status alerts invisible | Render routine metadata as clean muted text separated by `·`; reserve pills for actionable filters or genuine status (`Failed`, `Pending Review`) |
 | 48px gradient square holding a 20px stroke icon above 2 lines of text | Template filler | Align small `16px–20px` crisp icons inline with titles, or omit icons completely in typographic feature lists |
 
@@ -115,5 +115,7 @@ characteristic AI-generated UI clichés.
 | All 12 HUD widgets permanently visible around all 4 screen edges | Visual claustrophobia; steals focus from gameplay | Keep center screen sacred; group related stats cleanly in corners and auto-fade out-of-combat bars when full/idle |
 | Tiny `11px–13px` lore/inventory text and dense multi-paragraph tooltips | Completely illegible on TVs (10-foot distance) and handhelds (Steam Deck) | Scale body text (`>= 18–22px` equiv. at 1080p, `>= 26–28px` for 10-foot/handheld mode) and split stats cleanly from flavor text |
 | Mouse-only hover states and tiny `X` close buttons | Breaks completely with a controller or keyboard D-pad | Design explicit high-contrast focus/selection rings, wrap-around grid/list navigation, and a dynamic footer input legend (`[A] Equip  [B] Back  [X] Compare`) |
-| Rarity or team status indicated by color alone (green/blue/purple/gold) | Fails colorblind players and blurs in fast combat | Pair color with distinct icon shapes, border notches, or explicit text tags (`Rare`, `Ally`) |
+| Rarity or team status indicated by color alone, OR 4–5 screaming neon hues (`#4ade80` + `#38bdf8` + `#fb7185` + `#e09f3e`) fighting on a murky green-black canvas | Colorblind failure or neon rainbow visual chaos | Use clean low-chroma obsidian/charcoal neutrals (`#0E1013`–`#1D2128`), ONE primary accent, and restrained tonal badges paired with distinct `<svg>` shapes |
+| Text-only inventory rectangles without item artwork or silhouettes | Feels like an Excel sheet instead of a game | Draw bespoke inline `<svg>` weapon, armor, and module silhouettes in every slot and enlarged in the inspector |
+| QA/debug state toggles (`[Normal] [Loading] [Error]`) or duplicate stacked grids in user-facing UI | Confuses real players and creates 20+ nested boxes | Keep user chrome 100% dedicated to the player task; separate active loadout and storage cleanly in an open split layout |
 

@@ -167,14 +167,28 @@ template.
         clean horizontal tabs with real-time preview or description pane on the
         right, explicit `Apply / Reset to Defaults`, and an unsaved-changes prompt.
 *   **Inventory, Crafting & Skill Trees**:
+    *   *Open 3-Zone or 2-Zone Split (Never Stacked Boxes)*: Use an open canvas
+        divided by subtle `1px` hairlines—not nested bordered boxes inside boxes.
+        Avoid duplicating the exact same items in two stacked grids; either put
+        the 4–6 **Active Equipment Slots** in a dedicated slim left loadout rail
+        (or silhouette paperdoll) beside the **Storage Grid**, OR filter equipped
+        items cleanly with a single subtle corner indicator.
+    *   *Visual `<svg>` Silhouettes in Every Slot*: Never ship bare text-only
+        inventory rectangles. Render bespoke inline `<svg>` weapon, armor,
+        module, or item silhouettes inside every slot and enlarged in the
+        inspector so players recognize items visually in 0.2 seconds.
     *   *Grid/List + Dedicated Inspector*: Never render giant floating hover
-        tooltips that cover adjacent inventory slots. Pair the item grid/list on
-        the left with a fixed, spacious **Comparison & Stats Inspector** on the
-        right showing item icon, tier/tag (icon + text, never color alone),
-        equipped diff (`+12 DMG` green, `-4 DEF` red), and crisp action prompts.
+        tooltips that cover adjacent slots. Pair the grid/list with a clean,
+        spacious **Comparison & Stats Inspector** showing the `<svg>` item
+        illustration, tier/tag (shape + subtle tonal text, never screaming neon
+        confetti), equipped diff (`+12` / `-4`), and clear primary/secondary
+        actions.
+    *   *User-Focused Chrome*: Never pollute the primary player HUD or header
+        with developer QA/state-simulator buttons (`[Normal] [Loading] [Error]`)
+        unless explicitly asked to build a test harness.
     *   *Dual Input Parity*: Support both direct mouse click/drag and
-        D-pad/WASD grid navigation with an unmistakable focus frame and a
-        persistent bottom-edge **Control Legend Bar** (`[A / Enter] Equip  [X / R] Compare  [B / Esc] Close`).
+        D-pad/arrow-key grid navigation with an unmistakable focus frame and a
+        quiet bottom-edge **Control Legend Bar** (`[A / Enter] Equip  [B / Esc] Back`).
 *   **Dialogue & Narrative UI**:
     *   Use a lower-third scrim (`max-width: 65ch` text measure) with clear
         speaker nameplate, crisp `>= 22px` readable font, and numbered/hotkeyed

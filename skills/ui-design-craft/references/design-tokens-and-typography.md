@@ -17,28 +17,32 @@ looks sterile and synthetic—especially when paired with warm accents. **Every
 neutral scale must carry a deliberate subtle undertone**:
 
 *   **Warm Paper / Sand / Charcoal** (Editorial, Finance, Consumer, Craft):
-    Canvas `#FAF8F5`, Surface `#FFFFFF`, Subtle `#F1EDE4`, Dark `#141210`, Ink `#1C1917`
+    Canvas `#FAF8F5`, Surface `#FFFFFF`, Subtle `#F1EDE4`, Dark `#141312`, Ink `#1C1917`
 *   **Mineral / Cool Zinc** (Productivity, B2B SaaS, Neutral Utility):
     Canvas `#F8F9FA`, Surface `#FFFFFF`, Subtle `#EEF0F3`, Dark `#111214`, Ink `#111318`
-*   **Obsidian / Graphite** (DevTools, Audio/Video, Technical Consoles):
-    Canvas `#0B0D10`, Surface `#13161B`, Elevated `#1B1F26`, Hairline `rgba(255,255,255,0.08)`
-*   **Organic / Olive-Slate** (Climate, Health, Outdoor, Fantasy UI):
-    Canvas `#F5F6F3`, Surface `#FCFDFB`, Dark `#111512`, Ink `#182019`
+*   **Obsidian / Graphite** (DevTools, Audio/Video, Tactical Consoles, Dark UI):
+    Canvas `#0E1013`, Surface `#15181D`, Elevated `#1D2128`, Hairline `rgba(255,255,255,0.08)`
+*   **Organic / Light Sage** (Climate, Health, Outdoor — light mode only):
+    Canvas `#F5F6F3`, Surface `#FCFDFB`, Ink `#182019`
 
-*Never use raw `#000000` as a UI background (use `#0B0D10`–`#121214`), and avoid
-stark `#FFFFFF` backgrounds for long reading/editorial surfaces (use `#FCFCFA` or
-`#FAF8F5`).*
+*Never use raw `#000000` as a UI background, and never invent muddy dark-green
+(`#141b18`) or murky teal-black surfaces—keep dark mode neutrals clean, crisp,
+and low-chroma (`#0E1013`–`#1D2128`). Avoid stark `#FFFFFF` on long reading
+surfaces (`#FCFCFA` or `#FAF8F5` is far easier on the eye).*
 
-### Rule B: Strict 60-30-10 Token Discipline
+### Rule B: Strict 60-30-10 & Max-Hue Discipline
 
 *   **60% Canvas**: Calm background where eyes rest.
 *   **30% Structural Surfaces & Chrome**: Sidebars, headers, tables, input wells,
     bounded by subtle `1px` hairline borders (`--border-subtle`).
 *   **10% Single Focal Accent**: **One** primary accent (`--accent`) used ONLY
-    for primary CTAs, active tabs/selections, and focus rings.
-*   **Semantic Colors Locked to Meaning**: Green/amber/red exist strictly for
-    success/warning/danger or game vitals (HP/stamina/shield)—never as random
-    rainbow card badges.
+    for primary CTAs, active selections, and focus rings.
+*   **Hard Cap on Simultaneous Saturated Hues**: Never place 3+ bright neon
+    colors (`#4ade80` green + `#38bdf8` cyan + `#fb7185` pink + `#e09f3e` amber)
+    on one screen. Keep rarity/category tags **tonal and understated** (muted
+    ash `#8C939E`, brushed bronze `#A88B6A`, steel `#93A8BE`, warm gold `#D4A14A`
+    with subtle alpha borders) and reserve vivid green/red strictly for small
+    inline numeric deltas (`+14`, `-3`) or real error alerts.
 
 ### Rule C: Contrast-Verified Accent Pairings (Never Fail WCAG AA)
 

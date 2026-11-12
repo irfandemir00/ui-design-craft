@@ -89,13 +89,13 @@ export function auditFile(filePath) {
     const lineNum = idx + 1;
     if (isIgnoredLine(line)) return;
 
-    // 1. Sparkle / Rocket emoji & Sparkles icon crutches
-    if (/[✨🚀]/.test(line) || /<\s*Sparkles(?:Icon)?\b/.test(line)) {
+    // 1. Emoji icon crutches instead of bespoke inline SVGs
+    if (/[✨🚀⚡🔥🎯💡📦🛡⚔📊]/.test(line) || /<\s*Sparkles(?:Icon)?\b/.test(line)) {
       push(
         errors,
         lineNum,
         "emoji-slop",
-        "Avoid ✨/🚀 emojis or <Sparkles> icons as generic UI decoration; use plain crisp labels or purposeful monochrome icons."
+        "Avoid emoji icon crutches (✨/🚀/⚡/📦/🛡️/etc.) or <Sparkles>; write bespoke inline <svg> icons or clean plain text."
       );
     }
 
@@ -308,6 +308,39 @@ export function auditFile(filePath) {
         1,
         "display-font-on-body",
         `Do not apply display-only font "${bodyDisplayMatch[1]}" globally to body/:root; reserve it for headings and pair with a clean readable UI/body font.`
+      );
+    }
+
+    // Competing bright neon rainbow colors in one file
+    const neonHits = [
+      /#4ade80/i,
+      /#22c55e/i,
+      /#38bdf8/i,
+      /#22d3ee/i,
+      /#fb7185/i,
+      /#f472b6/i,
+      /#a855f7/i,
+      /#c084fc/i,
+      /#e09f3e/i,
+      /#f59e0b/i,
+      /#84cc16/i,
+    ].filter((re) => re.test(content));
+    if (neonHits.length >= 4) {
+      push(
+        warnings,
+        1,
+        "neon-rainbow-soup",
+        `Found ${neonHits.length} competing bright accent/neon hex hues in one file; stick to 1 primary accent and keep secondary tags muted/tonal.`
+      );
+    }
+
+    // Complex UI markup with zero bespoke inline <svg>
+    if (isWebMarkup && lines.length >= 80 && !/<svg\b/i.test(content)) {
+      push(
+        warnings,
+        1,
+        "missing-custom-svg",
+        "Substantial UI view contains zero inline <svg> icons or illustrations; craft bespoke inline <svg> assets for visual anchors."
       );
     }
   }
