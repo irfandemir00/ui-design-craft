@@ -1,9 +1,10 @@
 {
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "ui-design-craft",
   "displayName": "UI Design Craft (Anti-AI-Slop)",
   "version": "1.0.0",
   "description": "Always-on UI design rules, cross-platform craft skill (Web, Desktop, Mobile, Video Games), and automatic anti-AI-slop audit hook.",
-  "logo": "https://raw.githubusercontent.com/irfandemir00/ui-design-craft/main/assets/logo.svg",
+  "logo": "assets/logo.png",
   "author": {
     "name": "irfandemir00"
   },

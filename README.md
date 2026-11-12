@@ -48,6 +48,7 @@ ui-design-craft/
 │           └── audit_ui_slop.mjs
 └── assets/
     ├── icon.jpg
+    ├── logo.png
     └── logo.svg
 ```
 
