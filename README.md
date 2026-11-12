@@ -16,13 +16,13 @@ Without explicit constraints, AI-generated UI converges on the same synthetic pa
 
 **UI Design Craft** fixes this at three layers:
 
-1. **Always-On Rule (`rules/AGENTS.md`)** — Automatically enforces a Pre-Code Design Brief, undertone-matched palettes, verified typography pairings, and platform-native ergonomics on every UI task.
+1. **Always-On Rule (`rules/AGENTS.md`)** — Automatically enforces a Pre-Code Design Brief, restrained 60-30-10 color plans (max 1 focal accent, no multi-neon rainbow soup), verified typography pairings, bespoke inline `<svg>` icons/silhouettes, open user-friendly layouts, and platform-native ergonomics on every UI task.
 2. **Cross-Platform Skill (`skills/ui-design-craft/`)** — Detailed workflows and references covering:
    - **Web & Generative UI** (HTML/CSS, Tailwind, React, Next.js, Vue, Svelte, Astro)
    - **Desktop Applications** (Electron, Tauri, Qt, WinUI, SwiftUI, GTK — split panes, compact toolbars, status bars, `⌘K` workflows)
    - **Mobile Applications** (iOS, Android, React Native, Flutter — thumb-zone reachability, `SafeArea`, bottom sheets, `>= 44pt/48dp` targets)
-   - **Video Game Interfaces** (HUDs, menus, inventories, dialogue — live-backdrop scrims, 5% safe zones, 10-foot/handheld scale, mouse + gamepad dual navigation)
-3. **Automated Anti-Slop Stop Hook (`hooks.json` + `audit_ui_slop.mjs`)** — Scans UI files modified during a turn and blocks completion if measurable slop slips through (`✨`/`🚀` crutches, `"Supercharge"`/`"Acme Corp"` placeholder copy, slate+indigo/purple gradients, `bg-clip-text` gradient headlines, `hover:scale-105` wobble, `<div onClick>`, missing `:focus-visible` rings, low-contrast `text-white` on bright amber/lime/cyan, unloaded HTML webfonts, or display-only fonts applied globally to `body`).
+   - **Video Game Interfaces** (HUDs, menus, inventories, dialogue — live-backdrop scrims, 5% safe zones, 10-foot/handheld scale, bespoke `<svg>` item silhouettes, mouse + gamepad dual navigation)
+3. **Automated Anti-Slop Stop Hook (`hooks.json` + `audit_ui_slop.mjs`)** — Scans UI files modified during a turn and flags measurable slop (`✨`/`🚀`/`📦` emoji crutches, `"Supercharge"`/`"Acme Corp"` placeholder copy, slate+indigo/purple gradients, `bg-clip-text` gradient headlines, `hover:scale-105` wobble, `<div onClick>`, missing `:focus-visible` rings, low-contrast `text-white` on bright amber/lime/cyan, multi-neon rainbow soup, missing custom `<svg>` art, unloaded HTML webfonts, or display-only fonts applied globally to `body`).
 
 ---
 
