@@ -1,0 +1,11 @@
+{
+  "ui-slop-audit": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node scripts/stop_ui_audit_hook.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}
