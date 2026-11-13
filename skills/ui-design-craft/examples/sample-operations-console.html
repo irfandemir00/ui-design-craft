@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kuzey Lojistik — Sevkiyat ve Gümrük Operasyonları</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600&subset=latin,latin-ext&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --bg-canvas: #f7f8fa;
+      --bg-surface: #ffffff;
+      --bg-subtle: #eff1f5;
+      --bg-hover: #f3f5f8;
+      --bg-selected: #eef2ff;
+      --border-subtle: rgba(17, 24, 39, 0.09);
+      --border-strong: rgba(17, 24, 39, 0.16);
+      --text-primary: #111318;
+      --text-secondary: #374151;
+      --text-muted: #5f6672;
+      --accent: #1d4ed8;
+      --accent-hover: #1e40af;
+      --accent-fg: #ffffff;
+      --accent-tint: rgba(29, 78, 216, 0.08);
+
+      --status-transit-bg: #f1f5f9;
+      --status-transit-fg: #334155;
+      --status-transit-border: rgba(51, 65, 85, 0.18);
+
+      --status-inspection-bg: #fef3c7;
+      --status-inspection-fg: #92400e;
+      --status-inspection-border: rgba(146, 64, 14, 0.22);
+
+      --status-pending-bg: #f3f4f6;
+      --status-pending-fg: #4b5563;
+      --status-pending-border: rgba(75, 85, 99, 0.2);
+
+      --status-cleared-bg: #ecfdf5;
+      --status-cleared-fg: #166534;
+      --status-cleared-border: rgba(22, 101, 52, 0.2);
+
+      --status-delayed-bg: #fef2f2;
+      --status-delayed-fg: #b91c1c;
+      --status-delayed-border: rgba(185, 28, 28, 0.22);
+
+      --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --ease-crisp: cubic-bezier(0.2, 0, 0, 1);
+      --shadow-popover: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: clip;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      margin: 0;
+      font-family: var(--font-display);
+      color: var(--text-primary);
+      text-wrap: balance;
+    }
+
+    p {
+      margin: 0;
+      text-wrap: pretty;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .min-w-0 {
+      min-width: 0;
+    }
+
+    .truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Shell layout: open split workspace separated by 1px hairlines */
+    .app-shell {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+      min-height: 100vh;
+    }
+
+    /* Left navigation rail */
+    .left-rail {
+      grid-row: 1 / 3;
+      background-color: var(--bg-canvas);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      gap: 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 8px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background-color: var(--accent);
+      color: var(--accent-fg);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      line-height: 1.25;
+      color: var(--text-primary);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .rail-close-btn {
+      display: none;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .rail-section-label {
+      padding: 0 10px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.32;
+      color: var(--text-muted);
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 140ms var(--ease-crisp), color 140ms var(--ease-crisp);
+    }
+
+    .nav-btn:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .nav-btn[aria-current="page"] {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+      font-weight: 600;
+    }
+
+    .nav-btn[aria-current="page"] .nav-icon {
+      color: var(--accent);
+    }
+
+    .nav-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .nav-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 4px;
+      background-color: var(--bg-subtle);
+      flex-shrink: 0;
+    }
+
+    .rail-gates {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .gate-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #166534;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .gate-dot--warn {
+      background-color: #92400e;
+    }
+
+    .gate-latency {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Main workspace frame */
+    .workspace-column {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background-color: var(--bg-surface);
+    }
+
+    /* Top bar (56px) */
+    .top-bar {
+      min-height: 56px;
+      padding: 10px 20px;
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .breadcrumb-group {
+      min-width: 0;
+    }
+
+    .breadcrumb-trail {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      line-height: 1.24;
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      height: 34px;
+      padding: 0 13px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 140ms var(--ease-crisp), border-color 140ms var(--ease-crisp), color 140ms var(--ease-crisp);
+    }
+
+    .btn:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--accent-fg);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--bg-subtle);
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--text-secondary);
+      border-color: transparent;
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .btn-sm {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .refresh-btn {
+      min-width: 102px;
+    }
+
+    /* Split workspace: Main table + Right inspector */
+    .split-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 348px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .main-pane {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    /* Unified KPI strip (hairline divided, zero nested cards) */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface);
+    }
+
+    .kpi-cell {
+      padding: 14px 20px;
+      min-width: 0;
+    }
+
+    .kpi-cell + .kpi-cell {
+      border-left: 1px solid var(--border-subtle);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+      line-height: 1.32;
+      color: var(--text-muted);
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .kpi-delta {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .kpi-delta--warn {
+      color: var(--status-inspection-fg);
+    }
+
+    /* Filter toolbar */
+    .filter-bar {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: var(--bg-canvas);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .filter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .field-group--search {
+      flex: 1 1 240px;
+      max-width: 340px;
+    }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      line-height: 1.3;
+      color: var(--text-muted);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .text-input,
+    .select-input,
+    .textarea-input {
+      width: 100%;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 1.4;
+      transition: border-color 140ms var(--ease-crisp);
+    }
+
+    .text-input,
+    .select-input {
+      height: 34px;
+      padding: 0 10px;
+    }
+
+    .text-input--with-icon {
+      padding-left: 32px;
+    }
+
+    .textarea-input {
+      padding: 8px 10px;
+      resize: vertical;
+      min-height: 74px;
+    }
+
+    .status-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .chip-btn {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background-color: var(--bg-surface);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 140ms var(--ease-crisp), border-color 140ms var(--ease-crisp), color 140ms var(--ease-crisp);
+    }
+
+    .chip-btn:hover {
+      background-color: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .chip-btn[aria-pressed="true"] {
+      background-color: var(--accent-tint);
+      border-color: rgba(29, 78, 216, 0.32);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Error banner */
+    .error-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 20px;
+      background-color: var(--status-delayed-bg);
+      border-bottom: 1px solid var(--status-delayed-border);
+      color: var(--status-delayed-fg);
+    }
+
+    .error-banner-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .error-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .error-desc {
+      font-size: 12px;
+      color: #7f1d1d;
+      line-height: 1.45;
+    }
+
+    /* Operational table */
+    .table-region {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      background-color: var(--bg-surface);
+    }
+
+    .ops-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .ops-table thead th {
+      padding: 10px 16px;
+      background-color: var(--bg-canvas);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+      line-height: 1.32;
+      color: var(--text-muted);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .ops-table thead th.num,
+    .ops-table tbody td.num {
+      text-align: right;
+    }
+
+    .ops-table tbody tr {
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color 120ms var(--ease-crisp);
+    }
+
+    .ops-table tbody tr:hover {
+      background-color: var(--bg-hover);
+    }
+
+    .ops-table tbody tr.is-selected {
+      background-color: var(--bg-selected);
+    }
+
+    .ops-table tbody td {
+      padding: 10px 16px;
+      vertical-align: middle;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .row-trigger {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      width: 100%;
+      padding: 2px 0;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .row-id {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1.3;
+    }
+
+    .row-company {
+      font-weight: 500;
+      color: var(--text-primary);
+      max-width: 100%;
+    }
+
+    .row-route {
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 100%;
+    }
+
+    .mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .status-badge--transit {
+      background-color: var(--status-transit-bg);
+      color: var(--status-transit-fg);
+      border-color: var(--status-transit-border);
+    }
+
+    .status-badge--inspection {
+      background-color: var(--status-inspection-bg);
+      color: var(--status-inspection-fg);
+      border-color: var(--status-inspection-border);
+    }
+
+    .status-badge--pending_doc {
+      background-color: var(--status-pending-bg);
+      color: var(--status-pending-fg);
+      border-color: var(--status-pending-border);
+    }
+
+    .status-badge--cleared {
+      background-color: var(--status-cleared-bg);
+      color: var(--status-cleared-fg);
+      border-color: var(--status-cleared-border);
+    }
+
+    .status-badge--delayed {
+      background-color: var(--status-delayed-bg);
+      color: var(--status-delayed-fg);
+      border-color: var(--status-delayed-border);
+    }
+
+    /* Loading skeleton rows */
+    .skeleton-bar {
+      display: inline-block;
+      height: 12px;
+      border-radius: 4px;
+      background-color: var(--bg-subtle);
+      animation: skeleton-pulse 1.3s ease-in-out infinite;
+    }
+
+    @keyframes skeleton-pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.45;
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .is-spinning {
+      animation: spin 750ms linear infinite;
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 56px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .empty-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.28;
+    }
+
+    .empty-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Right inspector pane */
+    .inspector-pane {
+      background-color: var(--bg-surface);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .inspector-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .inspector-code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .inspector-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.28;
+      margin-top: 2px;
+    }
+
+    .inspector-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .inspector-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.32;
+      color: var(--text-muted);
+    }
+
+    .schematic-box {
+      padding: 12px;
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .schematic-caption {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .meta-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.3;
+    }
+
+    .meta-val {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    .meta-val--mono {
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .timeline-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 12px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      font-size: 12px;
+    }
+
+    .timeline-node {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      background-color: var(--border-strong);
+    }
+
+    .timeline-node--active {
+      background-color: var(--accent);
+    }
+
+    .timeline-time {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .inspector-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .note-feedback {
+      font-size: 12px;
+      color: var(--status-cleared-fg);
+      min-height: 18px;
+    }
+
+    /* Bottom status bar */
+    .status-footer {
+      grid-column: 2;
+      min-height: 34px;
+      padding: 6px 20px;
+      background-color: var(--bg-canvas);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .status-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .footer-link-btn {
+      border: 0;
+      background: transparent;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    .footer-link-btn:hover {
+      background-color: var(--accent-tint);
+    }
+
+    /* Modal dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 19, 24, 0.45);
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 480px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-popover);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--status-delayed-fg);
+      margin-top: 2px;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      background-color: var(--bg-canvas);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .drawer-scrim {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 19, 24, 0.42);
+      z-index: 35;
+    }
+
+    .drawer-scrim.is-open {
+      display: block;
+    }
+
+    /* Responsive breakpoints */
+    @media (max-width: 1180px) {
+      .split-body {
+        grid-template-columns: minmax(0, 1fr) 310px;
+      }
+      .kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .kpi-cell:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .kpi-cell:nth-child(4) {
+        border-top: 1px solid var(--border-subtle);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .left-rail {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 260px;
+        z-index: 40;
+        transform: translateX(-100%);
+        transition: transform 160ms var(--ease-crisp);
+      }
+      .left-rail.is-open {
+        transform: translateX(0);
+      }
+      .mobile-menu-btn,
+      .rail-close-btn {
+        display: inline-flex;
+      }
+      .status-footer {
+        grid-column: 1;
+      }
+      .split-body {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .main-pane {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-bar {
+        padding: 10px 14px;
+      }
+      .kpi-cell {
+        padding: 12px 14px;
+      }
+      .filter-bar {
+        padding: 12px 14px;
+      }
+      .ops-table thead {
+        display: none;
+      }
+      .ops-table,
+      .ops-table tbody,
+      .ops-table tr,
+      .ops-table td {
+        display: block;
+        width: 100%;
+      }
+      .ops-table tbody tr {
+        padding: 10px 14px;
+      }
+      .ops-table tbody td {
+        padding: 3px 0;
+        border: 0;
+      }
+      .ops-table tbody td.num {
+        text-align: left;
+      }
+      .modal-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .btn {
+        min-height: 40px;
+      }
+      .chip-btn {
+        min-height: 36px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div id="drawer-scrim" class="drawer-scrim" hidden></div>
+
+    <aside id="left-rail" class="left-rail" aria-label="Operasyon kenar çubuğu">
+      <div class="brand-header">
+        <div class="brand-lockup min-w-0">
+          <div class="brand-mark" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9z" />
+              <path d="M12 12l9-4.5" />
+              <path d="M12 12v9" />
+              <path d="M12 12L3 7.5" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="brand-name truncate">Kuzey Lojistik</div>
+            <div class="brand-sub truncate">Gümrük &amp; Sevkiyat</div>
+          </div>
+        </div>
+        <button id="rail-close-btn" type="button" class="rail-close-btn" aria-label="Menüyü kapat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav aria-label="Ana operasyon görünümleri">
+        <div class="rail-section-label">Operasyon Kuyruğu</div>
+        <ul class="nav-list">
+          <li>
+            <button type="button" class="nav-btn" data-nav="all" aria-current="page">
+              <span class="nav-btn-left min-w-0">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 10h18M9 4v16" />
+                </svg>
+                <span class="truncate">Tüm Sevkiyatlar</span>
+              </span>
+              <span id="nav-count-all" class="nav-count tabular-nums">0</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-btn" data-nav="inspection">
+              <span class="nav-btn-left min-w-0">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <span class="truncate">Gümrük İncelemesi</span>
+              </span>
+              <span id="nav-count-inspection" class="nav-count tabular-nums">0</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-btn" data-nav="pending_doc">
+              <span class="nav-btn-left min-w-0">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6M9 14h6M9 18h4" />
+                </svg>
+                <span class="truncate">Evrak Eksikleri</span>
+              </span>
+              <span id="nav-count-pending_doc" class="nav-count tabular-nums">0</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-btn" data-nav="cleared">
+              <span class="nav-btn-left min-w-0">
+                <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <span class="truncate">Tamamlananlar</span>
+              </span>
+              <span id="nav-count-cleared" class="nav-count tabular-nums">0</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <section class="rail-gates" aria-labelledby="gates-heading">
+        <div id="gates-heading" class="rail-section-label">Sınır &amp; Liman Kapıları</div>
+        <div class="gate-row">
+          <span><span class="gate-dot" aria-hidden="true"></span>Ambarlı EDI</span>
+          <span class="gate-latency tabular-nums">34 ms</span>
+        </div>
+        <div class="gate-row">
+          <span><span class="gate-dot gate-dot--warn" aria-hidden="true"></span>Kapıkule Tır</span>
+          <span class="gate-latency tabular-nums">2s 15dk</span>
+        </div>
+        <div class="gate-row">
+          <span><span class="gate-dot" aria-hidden="true"></span>Mersin Liman</span>
+          <span class="gate-latency tabular-nums">41 ms</span>
+        </div>
+      </section>
+    </aside>
+
+    <div class="workspace-column">
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button id="mobile-menu-btn" type="button" class="mobile-menu-btn" aria-label="Menüyü aç" aria-controls="left-rail" aria-expanded="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+          <div class="breadcrumb-group">
+            <div id="breadcrumb-text" class="breadcrumb-trail truncate">Operasyon Merkezi / İhracat &amp; İthalat</div>
+            <h1 id="page-heading" class="page-title truncate">Aktif Sevkiyat ve Gümrük Kuyruğu</h1>
+          </div>
+        </div>
+        <div class="top-bar-actions">
+          <button id="refresh-btn" type="button" class="btn btn-secondary refresh-btn">
+            <svg id="refresh-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+              <path d="M21 3v6h-6" />
+            </svg>
+            <span id="refresh-label">Yenile</span>
+          </button>
+          <button id="open-new-modal-btn" type="button" class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Yeni Sevkiyat</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="split-body">
+        <main class="main-pane" aria-label="Sevkiyat operasyon tablosu">
+          <section class="kpi-strip" aria-labelledby="kpi-heading">
+            <h2 id="kpi-heading" class="sr-only">Günlük operasyon özeti</h2>
+            <div class="kpi-cell">
+              <div class="kpi-label">Aktif Beyanname</div>
+              <div class="kpi-value-row">
+                <span id="kpi-total" class="kpi-value tabular-nums">8</span>
+                <span class="kpi-delta tabular-nums">Marmara + Ege</span>
+              </div>
+            </div>
+            <div class="kpi-cell">
+              <div class="kpi-label">Gümrük Bekleyen</div>
+              <div class="kpi-value-row">
+                <span id="kpi-attention" class="kpi-value tabular-nums">3</span>
+                <span class="kpi-delta kpi-delta--warn tabular-nums">İnceleme + Evrak</span>
+              </div>
+            </div>
+            <div class="kpi-cell">
+              <div class="kpi-label">Toplam Brüt Tonaj</div>
+              <div class="kpi-value-row">
+                <span id="kpi-tonnage" class="kpi-value tabular-nums">148,4 t</span>
+                <span class="kpi-delta tabular-nums">8 konteyner/tır</span>
+              </div>
+            </div>
+            <div class="kpi-cell">
+              <div class="kpi-label">Tahmini Gümrük Vergisi</div>
+              <div class="kpi-value-row">
+                <span id="kpi-duty" class="kpi-value tabular-nums">₺1.428.600</span>
+                <span class="kpi-delta tabular-nums">Bilge V2</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="filter-bar" aria-labelledby="filter-heading">
+            <h2 id="filter-heading" class="sr-only">Arama ve durum filtreleri</h2>
+            <div class="filter-controls">
+              <div class="field-group field-group--search">
+                <label for="shipment-search" class="field-label">Beyanname, Firma veya Hat Ara</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M21 21l-4.35-4.35" />
+                  </svg>
+                  <input
+                    id="shipment-search"
+                    type="search"
+                    class="text-input text-input--with-icon"
+                    placeholder="Örn. KZY-2611, Ambarlı, Otomotiv"
+                  />
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="sort-select" class="field-label">Sıralama</label>
+                <select id="sort-select" class="select-input">
+                  <option value="priority">Öncelik ve Durum</option>
+                  <option value="weight_desc">Ağırlık (Yüksek → Düşük)</option>
+                  <option value="duty_desc">Vergi Tutarı (Yüksek → Düşük)</option>
+                  <option value="updated_desc">Son Güncelleme</option>
+                </select>
+              </div>
+            </div>
+
+            <fieldset class="status-chips">
+              <legend class="sr-only">Durum filtresi</legend>
+              <button type="button" class="chip-btn" data-status-filter="all" aria-pressed="true">Tümü</button>
+              <button type="button" class="chip-btn" data-status-filter="inspection" aria-pressed="false">İncelemede</button>
+              <button type="button" class="chip-btn" data-status-filter="pending_doc" aria-pressed="false">Evrak Bekliyor</button>
+              <button type="button" class="chip-btn" data-status-filter="transit" aria-pressed="false">Yolda</button>
+              <button type="button" class="chip-btn" data-status-filter="delayed" aria-pressed="false">Gecikmeli</button>
+            </fieldset>
+          </section>
+
+          <div id="error-banner" class="error-banner" role="alert" hidden>
+            <div class="error-banner-left">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5M12 16h.01" />
+              </svg>
+              <div class="min-w-0">
+                <div class="error-title">Gümrük EDI Kapısı Yanıt Vermedi (Zaman Aşımı)</div>
+                <div class="error-desc">Bilge V2 servisiyle son senkronizasyon başarısız oldu. Önbellekteki kayıtlar korunuyor.</div>
+              </div>
+            </div>
+            <button id="retry-connection-btn" type="button" class="btn btn-secondary btn-sm">Yeniden Dene</button>
+          </div>
+
+          <div id="table-region" class="table-region">
+            <table class="ops-table" aria-label="Sevkiyat ve gümrük beyanname listesi">
+              <thead>
+                <tr>
+                  <th style="width: 39%;">Beyanname &amp; Firma / Güzergâh</th>
+                  <th style="width: 14%;">Taşıma</th>
+                  <th style="width: 19%;">Gümrük Durumu</th>
+                  <th class="num" style="width: 12%;">Brüt (kg)</th>
+                  <th class="num" style="width: 16%;">Vergi / Saat</th>
+                </tr>
+              </thead>
+              <tbody id="shipment-tbody"></tbody>
+            </table>
+
+            <div id="empty-state" class="empty-state" hidden>
+              <svg width="88" height="64" viewBox="0 0 88 64" fill="none" stroke="#9CA3AF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="10" y="14" width="48" height="32" rx="3" />
+                <path d="M22 14v32M34 14v32M46 14v32" />
+                <path d="M58 26h14l6 8v12H58" />
+                <circle cx="24" cy="50" r="4" />
+                <circle cx="68" cy="50" r="4" />
+                <path d="M6 54h76" stroke-dasharray="3 3" />
+              </svg>
+              <h3 class="empty-title">Eşleşen sevkiyat kaydı bulunamadı</h3>
+              <p id="empty-reason" class="empty-desc">
+                Seçili arama terimi veya gümrük durumu filtresiyle eşleşen aktif beyanname yok.
+              </p>
+              <button id="clear-filters-btn" type="button" class="btn btn-secondary">Filtreleri Temizle</button>
+            </div>
+          </div>
+        </main>
+
+        <aside id="inspector-pane" class="inspector-pane" aria-labelledby="inspector-title">
+          <div class="inspector-header">
+            <div class="min-w-0">
+              <div id="inspector-id" class="inspector-code tabular-nums">KZY-2611-4082</div>
+              <h2 id="inspector-title" class="inspector-title truncate">Anadolu Otomotiv Yan Sanayi A.Ş.</h2>
+            </div>
+            <span id="inspector-status-badge" class="status-badge status-badge--inspection">İncelemede</span>
+          </div>
+
+          <section class="inspector-section" aria-labelledby="schematic-heading">
+            <h3 id="schematic-heading" class="inspector-section-title">Hat ve Taşıma Şeması</h3>
+            <div class="schematic-box">
+              <div id="inspector-schematic"></div>
+              <div class="schematic-caption">
+                <span id="inspector-origin" class="truncate">Gemlik Terminali</span>
+                <span id="inspector-dest" class="truncate">München Riem</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="declaration-heading">
+            <h3 id="declaration-heading" class="inspector-section-title">Beyanname Künyesi</h3>
+            <div class="meta-grid">
+              <div>
+                <div class="meta-label">GTİP / Rejim</div>
+                <div id="inspector-hs" class="meta-val meta-val--mono tabular-nums">8708.99 · 1000</div>
+              </div>
+              <div>
+                <div class="meta-label">Konteyner / Plaka</div>
+                <div id="inspector-unit" class="meta-val meta-val--mono tabular-nums">MSKU 904218-4</div>
+              </div>
+              <div>
+                <div class="meta-label">Brüt Ağırlık</div>
+                <div id="inspector-weight" class="meta-val tabular-nums">18.450 kg</div>
+              </div>
+              <div>
+                <div class="meta-label">Hesaplanan Vergi</div>
+                <div id="inspector-duty" class="meta-val tabular-nums">₺214.800</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="timeline-heading">
+            <h3 id="timeline-heading" class="inspector-section-title">Gümrük Hareket Akışı</h3>
+            <ul id="inspector-timeline" class="timeline-list"></ul>
+          </section>
+
+          <section class="inspector-section" aria-labelledby="actions-heading">
+            <h3 id="actions-heading" class="inspector-section-title">Operatör Kararı ve Not</h3>
+            <div class="field-group">
+              <label for="inspector-note" class="field-label">Gümrük Müşaviri Notu</label>
+              <textarea id="inspector-note" class="textarea-input" placeholder="Fiziki muayene veya evrak referansı ekleyin"></textarea>
+            </div>
+            <div class="inspector-actions">
+              <button id="save-note-btn" type="button" class="btn btn-secondary btn-sm">Notu Kaydet</button>
+              <button id="approve-btn" type="button" class="btn btn-primary btn-sm">Beyannameyi Onayla</button>
+              <button id="flag-delay-btn" type="button" class="btn btn-ghost btn-sm">Gecikme Bildir</button>
+            </div>
+            <div id="inspector-feedback" class="note-feedback" aria-live="polite"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <footer class="status-footer">
+      <div class="status-footer-left min-w-0">
+        <span id="edi-status-text" class="truncate">
+          <span id="edi-dot" class="gate-dot" aria-hidden="true"></span>
+          Gümrük EDI Bağlantısı: Çevrimiçi · 38 ms
+        </span>
+        <span id="last-sync-text" class="tabular-nums">Son senkronizasyon: 14:22</span>
+      </div>
+      <div>
+        <button id="test-edi-btn" type="button" class="footer-link-btn">Bağlantıyı Test Et</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Yeni Sevkiyat Modal -->
+  <div id="new-shipment-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 id="modal-title" class="modal-title">Yeni Gümrük Sevkiyatı Oluştur</h2>
+        <button id="close-modal-btn" type="button" class="btn btn-ghost btn-sm" aria-label="Formu kapat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <form id="new-shipment-form" novalidate>
+        <div class="modal-body">
+          <div class="field-group">
+            <label for="input-company" class="field-label">Gönderici / İthalatçı Firma</label>
+            <input id="input-company" type="text" class="text-input" placeholder="Örn. Marmara Elektrik Sanayi A.Ş." aria-describedby="err-company" required />
+            <div id="err-company" class="field-error" hidden></div>
+          </div>
+
+          <div class="field-group">
+            <label for="input-route" class="field-label">Güzergâh (Çıkış → Varış)</label>
+            <input id="input-route" type="text" class="text-input" placeholder="Örn. Ambarlı Limanı → Hamburg Eurogate" aria-describedby="err-route" required />
+            <div id="err-route" class="field-error" hidden></div>
+          </div>
+
+          <div class="modal-row">
+            <div class="field-group">
+              <label for="input-mode" class="field-label">Taşıma Modu</label>
+              <select id="input-mode" class="select-input">
+                <option value="sea">Denizyolu (Konteyner)</option>
+                <option value="road">Karayolu (TIR)</option>
+                <option value="air">Havayolu (Kargo)</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="input-status" class="field-label">Başlangıç Durumu</label>
+              <select id="input-status" class="select-input">
+                <option value="pending_doc">Evrak Bekliyor</option>
+                <option value="inspection">Gümrük İncelemesinde</option>
+                <option value="transit">Yolda</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-row">
+            <div class="field-group">
+              <label for="input-weight" class="field-label">Brüt Ağırlık (kg)</label>
+              <input id="input-weight" type="number" min="100" step="50" class="text-input tabular-nums" value="14200" aria-describedby="err-weight" required />
+              <div id="err-weight" class="field-error" hidden></div>
+            </div>
+            <div class="field-group">
+              <label for="input-duty" class="field-label">Tahmini Vergi (TRY)</label>
+              <input id="input-duty" type="number" min="0" step="500" class="text-input tabular-nums" value="96500" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-modal-btn" type="button" class="btn btn-secondary">Vazgeç</button>
+          <button type="submit" class="btn btn-primary">Kaydı Kuyruğa Ekle</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const STATUS_META = {
+        inspection: {
+          label: "İncelemede",
+          badgeClass: "status-badge--inspection",
+          priority: 1
+        },
+        delayed: {
+          label: "Gecikmeli",
+          badgeClass: "status-badge--delayed",
+          priority: 0
+        },
+        pending_doc: {
+          label: "Evrak Bekliyor",
+          badgeClass: "status-badge--pending_doc",
+          priority: 2
+        },
+        transit: {
+          label: "Yolda",
+          badgeClass: "status-badge--transit",
+          priority: 3
+        },
+        cleared: {
+          label: "Gümrükten Geçti",
+          badgeClass: "status-badge--cleared",
+          priority: 4
+        }
+      };
+
+      const MODE_LABELS = {
+        sea: "Denizyolu",
+        road: "Karayolu",
+        air: "Havayolu"
+      };
+
+      const VIEW_TITLES = {
+        all: {
+          breadcrumb: "Operasyon Merkezi / İhracat & İthalat",
+          heading: "Aktif Sevkiyat ve Gümrük Kuyruğu"
+        },
+        inspection: {
+          breadcrumb: "Operasyon Merkezi / Sarı & Kırmızı Hat",
+          heading: "Gümrük İncelemesi Bekleyenler"
+        },
+        pending_doc: {
+          breadcrumb: "Operasyon Merkezi / Eksik Belgeler",
+          heading: "Evrak Tamamlama Kuyruğu"
+        },
+        cleared: {
+          breadcrumb: "Operasyon Merkezi / Arşiv & Çıkış",
+          heading: "Gümrükten Geçen Sevkiyatlar"
+        }
+      };
+
+      const shipments = [
+        {
+          id: "KZY-2611-4082",
+          company: "Anadolu Otomotiv Yan Sanayi A.Ş.",
+          route: "Bursa Gemlik Terminali → München Güterbahnhof Riem",
+          origin: "Gemlik Terminali",
+          dest: "München Riem",
+          mode: "road",
+          status: "inspection",
+          weightKg: 18450,
+          dutyTry: 214800,
+          updatedAt: "14:18",
+          updatedOrder: 8,
+          hsCode: "8708.99 · 1000",
+          unitCode: "34 KZY 812",
+          note: "Kırmızı hat fiziki muayene sırası bekliyor (Kapıkule Peron 4).",
+          timeline: [
+            { time: "14:18", text: "Kapıkule X-Ray tarama sırasına alındı", active: true },
+            { time: "11:40", text: "ATR Dolaşım Belgesi sisteme işlendi", active: false },
+            { time: "08:15", text: "Gemlik çıkış tartımı tamamlandı", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4079",
+          company: "Marmara Medikal Cihazlar ve Soğuk Zincir Lojistik Ltd. Şti.",
+          route: "İstanbul Ambarlı Limanı → Rotterdam Maasvlakte II Terminali (Kriyojenik Parsiyel Hat)",
+          origin: "Ambarlı Limanı",
+          dest: "Rotterdam M-II",
+          mode: "sea",
+          status: "delayed",
+          weightKg: 24600,
+          dutyTry: 382400,
+          updatedAt: "14:05",
+          updatedOrder: 7,
+          hsCode: "9018.19 · 4000",
+          unitCode: "MSKU 904218-4",
+          note: "Soğutucu ünite kalibrasyon raporu liman acentesinden bekleniyor.",
+          timeline: [
+            { time: "14:05", text: "Gemi yükleme penceresi 4 saat ötelendi", active: true },
+            { time: "10:50", text: "Reefer konteyner sıcaklık doğrulaması: -18,4 °C", active: false },
+            { time: "Dün 19:20", text: "Ambarlı gümrüklü sahaya giriş yapıldı", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4074",
+          company: "Trakya Tekstil İhracat ve Dış Ticaret A.Ş.",
+          route: "Çerkezköy Gümrük Sahası → Sofia Intermodal Terminali",
+          origin: "Çerkezköy Sahası",
+          dest: "Sofia Intermodal",
+          mode: "road",
+          status: "pending_doc",
+          weightKg: 12800,
+          dutyTry: 94200,
+          updatedAt: "13:42",
+          updatedOrder: 6,
+          hsCode: "6204.62 · 1000",
+          unitCode: "59 TRK 409",
+          note: "EUR.1 menşe sertifikası ıslak imza onayı bekleniyor.",
+          timeline: [
+            { time: "13:42", text: "Eksik evrak bildirimi ihracatçıya iletildi", active: true },
+            { time: "09:30", text: "T1 transit beyanı taslağı oluşturuldu", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4068",
+          company: "Ege Tarım Ürünleri ve Zeytinyağı Kooperatifi",
+          route: "İzmir Alsancak İskelesi → Trieste Molo VII Terminali",
+          origin: "İzmir Alsancak",
+          dest: "Trieste Molo VII",
+          mode: "sea",
+          status: "transit",
+          weightKg: 27900,
+          dutyTry: 168500,
+          updatedAt: "12:55",
+          updatedOrder: 5,
+          hsCode: "1509.20 · 1000",
+          unitCode: "CMAU 441902-7",
+          note: "Bitki sağlığı sertifikası eksiksiz, gemi seyir halinde.",
+          timeline: [
+            { time: "12:55", text: "Ege açıkları AIS konum doğrulaması alındı", active: true },
+            { time: "07:10", text: "Alsancak gümrük çıkışı onaylandı", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4061",
+          company: "Boğaziçi Elektronik Dağıtım ve Mikroteknoloji A.Ş.",
+          route: "Sabiha Gökçen Kargo Terminali → Frankfurt CargoCity Süd",
+          origin: "SAW Kargo",
+          dest: "Frankfurt Süd",
+          mode: "air",
+          status: "inspection",
+          weightKg: 3420,
+          dutyTry: 295000,
+          updatedAt: "12:14",
+          updatedOrder: 4,
+          hsCode: "8542.31 · 1000",
+          unitCode: "AWB 235-88419201",
+          note: "Lityum pil güvenlik beyanı DGR kontrolü yapılıyor.",
+          timeline: [
+            { time: "12:14", text: "Sarı hat belge incelemesi atandı", active: true },
+            { time: "09:05", text: "Konşimento hava kargo sistemine aktarıldı", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4055",
+          company: "Karadeniz Demir Çelik Haddecilik Sanayi Tic. A.Ş.",
+          route: "Kocaeli Dilovası İskelesi → Köstence Limanı",
+          origin: "Dilovası İskelesi",
+          dest: "Köstence Limanı",
+          mode: "sea",
+          status: "cleared",
+          weightKg: 36500,
+          dutyTry: 112400,
+          updatedAt: "11:30",
+          updatedOrder: 3,
+          hsCode: "7214.20 · 1000",
+          unitCode: "HLXU 771034-1",
+          note: "Gümrük çıkış beyanı tescillendi.",
+          timeline: [
+            { time: "11:30", text: "Gümrük çıkış işlemi tamamlandı", active: true },
+            { time: "08:40", text: "Vergi tahakkuku ödendi", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4049",
+          company: "Başkent Güneş Enerjisi Sistemleri Üretim A.Ş.",
+          route: "Mersin Uluslararası Limanı → Pire Konteyner İskelesi",
+          origin: "Mersin Limanı",
+          dest: "Pire İskelesi",
+          mode: "sea",
+          status: "transit",
+          weightKg: 19200,
+          dutyTry: 108900,
+          updatedAt: "10:48",
+          updatedOrder: 2,
+          hsCode: "8541.43 · 1000",
+          unitCode: "TCNU 610293-9",
+          note: "Yükleme sonrası manifesto alıcı acenteye iletildi.",
+          timeline: [
+            { time: "10:48", text: "Mersin pilotaj çıkışı gerçekleşti", active: true },
+            { time: "Dün 16:15", text: "Gümrük muayene memuru onayı alındı", active: false }
+          ]
+        },
+        {
+          id: "KZY-2611-4042",
+          company: "Çukurova Kimya ve Polimer Endüstrisi A.Ş.",
+          route: "İskenderun Limanı → Marsilya Fos-sur-Mer Terminali",
+          origin: "İskenderun Limanı",
+          dest: "Marsilya Fos",
+          mode: "sea",
+          status: "cleared",
+          weightKg: 5530,
+          dutyTry: 52000,
+          updatedAt: "09:20",
+          updatedOrder: 1,
+          hsCode: "3901.20 · 9000",
+          unitCode: "OOLU 318490-2",
+          note: "MSDS güvenlik bilgi formu arşivlendi.",
+          timeline: [
+            { time: "09:20", text: "Varış limanı ön bildirimi onaylandı", active: true },
+            { time: "Dün 17:45", text: "İhracat beyannamesi kapatıldı", active: false }
+          ]
+        }
+      ];
+
+      const state = {
+        navView: "all",
+        statusFilter: "all",
+        searchQuery: "",
+        sortBy: "priority",
+        selectedId: shipments[0].id,
+        loading: false,
+        ediError: false
+      };
+
+      const elements = {
+        leftRail: document.getElementById("left-rail"),
+        drawerScrim: document.getElementById("drawer-scrim"),
+        mobileMenuBtn: document.getElementById("mobile-menu-btn"),
+        railCloseBtn: document.getElementById("rail-close-btn"),
+        navButtons: Array.from(document.querySelectorAll("[data-nav]")),
+        statusButtons: Array.from(document.querySelectorAll("[data-status-filter]")),
+        breadcrumbText: document.getElementById("breadcrumb-text"),
+        pageHeading: document.getElementById("page-heading"),
+        searchInput: document.getElementById("shipment-search"),
+        sortSelect: document.getElementById("sort-select"),
+        refreshBtn: document.getElementById("refresh-btn"),
+        refreshIcon: document.getElementById("refresh-icon"),
+        refreshLabel: document.getElementById("refresh-label"),
+        errorBanner: document.getElementById("error-banner"),
+        retryConnectionBtn: document.getElementById("retry-connection-btn"),
+        testEdiBtn: document.getElementById("test-edi-btn"),
+        ediStatusText: document.getElementById("edi-status-text"),
+        lastSyncText: document.getElementById("last-sync-text"),
+        tbody: document.getElementById("shipment-tbody"),
+        emptyState: document.getElementById("empty-state"),
+        emptyReason: document.getElementById("empty-reason"),
+        clearFiltersBtn: document.getElementById("clear-filters-btn"),
+        kpiTotal: document.getElementById("kpi-total"),
+        kpiAttention: document.getElementById("kpi-attention"),
+        kpiTonnage: document.getElementById("kpi-tonnage"),
+        kpiDuty: document.getElementById("kpi-duty"),
+        inspectorId: document.getElementById("inspector-id"),
+        inspectorTitle: document.getElementById("inspector-title"),
+        inspectorBadge: document.getElementById("inspector-status-badge"),
+        inspectorSchematic: document.getElementById("inspector-schematic"),
+        inspectorOrigin: document.getElementById("inspector-origin"),
+        inspectorDest: document.getElementById("inspector-dest"),
+        inspectorHs: document.getElementById("inspector-hs"),
+        inspectorUnit: document.getElementById("inspector-unit"),
+        inspectorWeight: document.getElementById("inspector-weight"),
+        inspectorDuty: document.getElementById("inspector-duty"),
+        inspectorTimeline: document.getElementById("inspector-timeline"),
+        inspectorNote: document.getElementById("inspector-note"),
+        saveNoteBtn: document.getElementById("save-note-btn"),
+        approveBtn: document.getElementById("approve-btn"),
+        flagDelayBtn: document.getElementById("flag-delay-btn"),
+        inspectorFeedback: document.getElementById("inspector-feedback"),
+        openModalBtn: document.getElementById("open-new-modal-btn"),
+        modal: document.getElementById("new-shipment-modal"),
+        closeModalBtn: document.getElementById("close-modal-btn"),
+        cancelModalBtn: document.getElementById("cancel-modal-btn"),
+        form: document.getElementById("new-shipment-form"),
+        inputCompany: document.getElementById("input-company"),
+        inputRoute: document.getElementById("input-route"),
+        inputMode: document.getElementById("input-mode"),
+        inputStatus: document.getElementById("input-status"),
+        inputWeight: document.getElementById("input-weight"),
+        inputDuty: document.getElementById("input-duty"),
+        errCompany: document.getElementById("err-company"),
+        errRoute: document.getElementById("err-route"),
+        errWeight: document.getElementById("err-weight")
+      };
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function formatNumberTr(num) {
+        return new Intl.NumberFormat("tr-TR").format(num);
+      }
+
+      function formatCurrencyTry(num) {
+        return "₺" + new Intl.NumberFormat("tr-TR").format(num);
+      }
+
+      function getModeIconSvg(mode) {
+        if (mode === "sea") {
+          return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20c2 1 4 1 6 0s4-1 6 0 4 1 6 0" /><path d="M4 16l2-6h12l2 6" /><path d="M9 10V5h6v5" /></svg>';
+        }
+        if (mode === "air") {
+          return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" /></svg>';
+        }
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="13" height="10" rx="1.5" /><path d="M15 9h4l3 3v4h-7V9z" /><circle cx="7" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></svg>';
+      }
+
+      function getSchematicSvg(mode, status) {
+        const nodeColor = status === "delayed" ? "#B91C1C" : "#1D4ED8";
+        let vehiclePath = "";
+        if (mode === "sea") {
+          vehiclePath = '<path d="M118 28h28l-4 9h-20l-4-9zM126 21h12v7h-12z" stroke="#111318" fill="#FFFFFF" />';
+        } else if (mode === "air") {
+          vehiclePath = '<path d="M118 30h26l-6-4h-12l-8 4zM129 22l4 8" stroke="#111318" fill="#FFFFFF" />';
+        } else {
+          vehiclePath = '<rect x="116" y="23" width="19" height="11" rx="1.5" stroke="#111318" fill="#FFFFFF" /><path d="M135 26h7l3 3v5h-10v-8z" stroke="#111318" fill="#FFFFFF" />';
+        }
+
+        return (
+          '<svg width="100%" height="52" viewBox="0 0 264 52" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M18 38H246" stroke="rgba(17,24,39,0.18)" stroke-dasharray="4 4" />' +
+          '<path d="M18 38H132" stroke="' + nodeColor + '" />' +
+          '<circle cx="18" cy="38" r="4.5" fill="#FFFFFF" stroke="' + nodeColor + '" />' +
+          '<circle cx="132" cy="38" r="4" fill="' + nodeColor + '" stroke="#FFFFFF" />' +
+          '<circle cx="246" cy="38" r="4.5" fill="#FFFFFF" stroke="#6B7280" />' +
+          vehiclePath +
+          "</svg>"
+        );
+      }
+
+      function getFilteredShipments() {
+        const query = state.searchQuery.trim().toLocaleLowerCase("tr-TR");
+
+        const filtered = shipments.filter((item) => {
+          if (state.navView === "inspection" && item.status !== "inspection" && item.status !== "delayed") {
+            return false;
+          }
+          if (state.navView === "pending_doc" && item.status !== "pending_doc") {
+            return false;
+          }
+          if (state.navView === "cleared" && item.status !== "cleared") {
+            return false;
+          }
+          if (state.statusFilter !== "all" && item.status !== state.statusFilter) {
+            return false;
+          }
+          if (query) {
+            const haystack = (item.id + " " + item.company + " " + item.route + " " + item.unitCode).toLocaleLowerCase("tr-TR");
+            if (!haystack.includes(query)) {
+              return false;
+            }
+          }
+          return true;
+        });
+
+        filtered.sort((a, b) => {
+          if (state.sortBy === "weight_desc") {
+            return b.weightKg - a.weightKg;
+          }
+          if (state.sortBy === "duty_desc") {
+            return b.dutyTry - a.dutyTry;
+          }
+          if (state.sortBy === "updated_desc") {
+            return b.updatedOrder - a.updatedOrder;
+          }
+          const prioDiff = STATUS_META[a.status].priority - STATUS_META[b.status].priority;
+          if (prioDiff !== 0) return prioDiff;
+          return b.updatedOrder - a.updatedOrder;
+        });
+
+        return filtered;
+      }
+
+      function updateNavAndKpiCounts() {
+        const counts = {
+          all: shipments.length,
+          inspection: 0,
+          pending_doc: 0,
+          cleared: 0
+        };
+        let totalWeight = 0;
+        let totalDuty = 0;
+
+        for (const item of shipments) {
+          totalWeight += item.weightKg;
+          totalDuty += item.dutyTry;
+          if (item.status === "inspection" || item.status === "delayed") counts.inspection += 1;
+          if (item.status === "pending_doc") counts.pending_doc += 1;
+          if (item.status === "cleared") counts.cleared += 1;
+        }
+
+        document.getElementById("nav-count-all").textContent = String(counts.all);
+        document.getElementById("nav-count-inspection").textContent = String(counts.inspection);
+        document.getElementById("nav-count-pending_doc").textContent = String(counts.pending_doc);
+        document.getElementById("nav-count-cleared").textContent = String(counts.cleared);
+
+        elements.kpiTotal.textContent = String(shipments.length);
+        elements.kpiAttention.textContent = String(counts.inspection + counts.pending_doc);
+        elements.kpiTonnage.textContent = (totalWeight / 1000).toFixed(1).replace(".", ",") + " t";
+        elements.kpiDuty.textContent = formatCurrencyTry(totalDuty);
+      }
+
+      function renderSkeletonRows() {
+        const rows = [];
+        for (let i = 0; i < 6; i += 1) {
+          rows.push(
+            '<tr>' +
+            '<td><span class="skeleton-bar" style="width: 34%;"></span><br><span class="skeleton-bar" style="width: 78%; margin-top: 6px;"></span></td>' +
+            '<td><span class="skeleton-bar" style="width: 72%;"></span></td>' +
+            '<td><span class="skeleton-bar" style="width: 82%;"></span></td>' +
+            '<td class="num"><span class="skeleton-bar" style="width: 68%;"></span></td>' +
+            '<td class="num"><span class="skeleton-bar" style="width: 76%;"></span></td>' +
+            "</tr>"
+          );
+        }
+        elements.tbody.innerHTML = rows.join("");
+        elements.emptyState.hidden = true;
+      }
+
+      function renderTable() {
+        if (state.loading) {
+          renderSkeletonRows();
+          return;
+        }
+
+        const list = getFilteredShipments();
+        if (list.length === 0) {
+          elements.tbody.innerHTML = "";
+          elements.emptyState.hidden = false;
+          if (state.searchQuery.trim()) {
+            elements.emptyReason.textContent =
+              '"' + state.searchQuery.trim() + '" araması ve seçili durum filtresiyle eşleşen beyanname kaydı yok.';
+          } else {
+            elements.emptyReason.textContent = "Seçili görünüm veya durum filtresinde aktif sevkiyat bulunmuyor.";
+          }
+          return;
+        }
+
+        elements.emptyState.hidden = true;
+        if (!list.some((item) => item.id === state.selectedId)) {
+          state.selectedId = list[0].id;
+        }
+
+        const html = list
+          .map((item) => {
+            const meta = STATUS_META[item.status];
+            const isSelected = item.id === state.selectedId;
+            const rowClass = isSelected ? ' class="is-selected"' : "";
+            const ariaLabel = item.id + " - " + item.company + " - " + meta.label;
+
+            return (
+              "<tr" + rowClass + ">" +
+              '<td><button type="button" class="row-trigger min-w-0" data-select-id="' + escapeHtml(item.id) + '" aria-label="' + escapeHtml(ariaLabel) + '" aria-pressed="' + (isSelected ? "true" : "false") + '">' +
+              '<span class="row-id tabular-nums">' + escapeHtml(item.id) + "</span>" +
+              '<span class="row-company truncate">' + escapeHtml(item.company) + "</span>" +
+              '<span class="row-route truncate">' + escapeHtml(item.route) + "</span>" +
+              "</button></td>" +
+              '<td><span class="mode-pill">' + getModeIconSvg(item.mode) + "<span>" + escapeHtml(MODE_LABELS[item.mode]) + "</span></span></td>" +
+              '<td><span class="status-badge ' + meta.badgeClass + '">' + escapeHtml(meta.label) + "</span></td>" +
+              '<td class="num tabular-nums">' + formatNumberTr(item.weightKg) + "</td>" +
+              '<td class="num tabular-nums">' +
+              "<div>" + formatCurrencyTry(item.dutyTry) + "</div>" +
+              '<div style="font-size:11px; color: var(--text-muted);">' + escapeHtml(item.updatedAt) + "</div>" +
+              "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
+
+        elements.tbody.innerHTML = html;
+      }
+
+      function renderInspector() {
+        const item = shipments.find((s) => s.id === state.selectedId) || shipments[0];
+        if (!item) return;
+
+        const meta = STATUS_META[item.status];
+        elements.inspectorId.textContent = item.id + " · " + MODE_LABELS[item.mode];
+        elements.inspectorTitle.textContent = item.company;
+        elements.inspectorBadge.className = "status-badge " + meta.badgeClass;
+        elements.inspectorBadge.textContent = meta.label;
+        elements.inspectorSchematic.innerHTML = getSchematicSvg(item.mode, item.status);
+        elements.inspectorOrigin.textContent = item.origin;
+        elements.inspectorDest.textContent = item.dest;
+        elements.inspectorHs.textContent = item.hsCode;
+        elements.inspectorUnit.textContent = item.unitCode;
+        elements.inspectorWeight.textContent = formatNumberTr(item.weightKg) + " kg";
+        elements.inspectorDuty.textContent = formatCurrencyTry(item.dutyTry);
+        elements.inspectorNote.value = item.note;
+
+        elements.approveBtn.disabled = item.status === "cleared";
+        elements.flagDelayBtn.disabled = item.status === "delayed" || item.status === "cleared";
+
+        elements.inspectorTimeline.innerHTML = item.timeline
+          .map((ev) => {
+            const dotClass = ev.active ? "timeline-node timeline-node--active" : "timeline-node";
+            return (
+              '<li class="timeline-item">' +
+              '<span class="' + dotClass + '" aria-hidden="true"></span>' +
+              '<div class="min-w-0">' +
+              '<div>' + escapeHtml(ev.text) + "</div>" +
+              '<div class="timeline-time tabular-nums">' + escapeHtml(ev.time) + "</div>" +
+              "</div>" +
+              "</li>"
+            );
+          })
+          .join("");
+      }
+
+      function renderAll() {
+        const viewMeta = VIEW_TITLES[state.navView] || VIEW_TITLES.all;
+        elements.breadcrumbText.textContent = viewMeta.breadcrumb;
+        elements.pageHeading.textContent = viewMeta.heading;
+        elements.errorBanner.hidden = !state.ediError;
+        updateNavAndKpiCounts();
+        renderTable();
+        renderInspector();
+      }
+
+      function setEdiErrorState(isError) {
+        state.ediError = isError;
+        if (isError) {
+          elements.ediStatusText.innerHTML = '<span class="gate-dot gate-dot--warn" aria-hidden="true"></span>Gümrük EDI Bağlantısı: Zaman Aşımı (Kod 504)';
+        } else {
+          const now = new Date();
+          const hh = String(now.getHours()).padStart(2, "0");
+          const mm = String(now.getMinutes()).padStart(2, "0");
+          elements.ediStatusText.innerHTML = '<span class="gate-dot" aria-hidden="true"></span>Gümrük EDI Bağlantısı: Çevrimiçi · 34 ms';
+          elements.lastSyncText.textContent = "Son senkronizasyon: " + hh + ":" + mm;
+        }
+        renderAll();
+      }
+
+      function triggerRefresh() {
+        if (state.loading) return;
+        state.loading = true;
+        elements.refreshBtn.disabled = true;
+        elements.refreshIcon.classList.add("is-spinning");
+        elements.refreshLabel.textContent = "Yenileniyor";
+        renderTable();
+
+        window.setTimeout(() => {
+          state.loading = false;
+          elements.refreshBtn.disabled = false;
+          elements.refreshIcon.classList.remove("is-spinning");
+          elements.refreshLabel.textContent = "Yenile";
+          setEdiErrorState(false);
+        }, 650);
+      }
+
+      function openMobileDrawer() {
+        elements.leftRail.classList.add("is-open");
+        elements.drawerScrim.hidden = false;
+        elements.drawerScrim.classList.add("is-open");
+        elements.mobileMenuBtn.setAttribute("aria-expanded", "true");
+        elements.railCloseBtn.focus();
+      }
+
+      function closeMobileDrawer() {
+        elements.leftRail.classList.remove("is-open");
+        elements.drawerScrim.classList.remove("is-open");
+        elements.drawerScrim.hidden = true;
+        elements.mobileMenuBtn.setAttribute("aria-expanded", "false");
+        if (window.innerWidth <= 920) {
+          elements.mobileMenuBtn.focus();
+        }
+      }
+
+      let lastFocusedBeforeModal = null;
+
+      function openNewShipmentModal() {
+        lastFocusedBeforeModal = document.activeElement;
+        elements.errCompany.hidden = true;
+        elements.errRoute.hidden = true;
+        elements.errWeight.hidden = true;
+        elements.modal.hidden = false;
+        elements.inputCompany.focus();
+      }
+
+      function closeNewShipmentModal() {
+        elements.modal.hidden = true;
+        if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === "function") {
+          lastFocusedBeforeModal.focus();
+        }
+      }
+
+      // Event listeners
+      elements.navButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.navView = btn.dataset.nav;
+          elements.navButtons.forEach((b) => {
+            if (b === btn) b.setAttribute("aria-current", "page");
+            else b.removeAttribute("aria-current");
+          });
+          if (window.innerWidth <= 920) closeMobileDrawer();
+          renderAll();
+        });
+      });
+
+      elements.statusButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.statusFilter = btn.dataset.statusFilter;
+          elements.statusButtons.forEach((b) => {
+            b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+          });
+          renderTable();
+        });
+      });
+
+      elements.searchInput.addEventListener("input", () => {
+        state.searchQuery = elements.searchInput.value;
+        renderTable();
+      });
+
+      elements.sortSelect.addEventListener("change", () => {
+        state.sortBy = elements.sortSelect.value;
+        renderTable();
+      });
+
+      elements.clearFiltersBtn.addEventListener("click", () => {
+        state.navView = "all";
+        state.statusFilter = "all";
+        state.searchQuery = "";
+        elements.searchInput.value = "";
+        elements.navButtons.forEach((b) => {
+          if (b.dataset.nav === "all") b.setAttribute("aria-current", "page");
+          else b.removeAttribute("aria-current");
+        });
+        elements.statusButtons.forEach((b) => {
+          b.setAttribute("aria-pressed", b.dataset.statusFilter === "all" ? "true" : "false");
+        });
+        renderAll();
+      });
+
+      elements.tbody.addEventListener("click", (event) => {
+        const trigger = event.target.closest("[data-select-id]");
+        if (!trigger) return;
+        state.selectedId = trigger.dataset.selectId;
+        elements.inspectorFeedback.textContent = "";
+        renderTable();
+        renderInspector();
+      });
+
+      elements.saveNoteBtn.addEventListener("click", () => {
+        const item = shipments.find((s) => s.id === state.selectedId);
+        if (!item) return;
+        item.note = elements.inspectorNote.value.trim();
+        elements.inspectorFeedback.textContent = "Operatör notu " + item.id + " kaydına işlendi.";
+      });
+
+      elements.approveBtn.addEventListener("click", () => {
+        const item = shipments.find((s) => s.id === state.selectedId);
+        if (!item || item.status === "cleared") return;
+        item.status = "cleared";
+        item.updatedAt = "Şimdi";
+        item.updatedOrder = Date.now();
+        item.timeline.forEach((t) => { t.active = false; });
+        item.timeline.unshift({ time: "Şimdi", text: "Gümrük çıkışı operatör tarafından onaylandı", active: true });
+        elements.inspectorFeedback.textContent = item.id + " gümrükten geçiş için onaylandı.";
+        renderAll();
+      });
+
+      elements.flagDelayBtn.addEventListener("click", () => {
+        const item = shipments.find((s) => s.id === state.selectedId);
+        if (!item || item.status === "delayed" || item.status === "cleared") return;
+        item.status = "delayed";
+        item.updatedAt = "Şimdi";
+        item.updatedOrder = Date.now();
+        item.timeline.forEach((t) => { t.active = false; });
+        item.timeline.unshift({ time: "Şimdi", text: "Sınır/liman beklemesi nedeniyle gecikme işlendi", active: true });
+        elements.inspectorFeedback.textContent = item.id + " için gecikme bildirimi oluşturuldu.";
+        renderAll();
+      });
+
+      elements.refreshBtn.addEventListener("click", triggerRefresh);
+      elements.testEdiBtn.addEventListener("click", () => {
+        setEdiErrorState(true);
+      });
+      elements.retryConnectionBtn.addEventListener("click", triggerRefresh);
+
+      elements.mobileMenuBtn.addEventListener("click", openMobileDrawer);
+      elements.railCloseBtn.addEventListener("click", closeMobileDrawer);
+      elements.drawerScrim.addEventListener("click", closeMobileDrawer);
+
+      elements.openModalBtn.addEventListener("click", openNewShipmentModal);
+      elements.closeModalBtn.addEventListener("click", closeNewShipmentModal);
+      elements.cancelModalBtn.addEventListener("click", closeNewShipmentModal);
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (!elements.modal.hidden) {
+            closeNewShipmentModal();
+          } else if (elements.leftRail.classList.contains("is-open")) {
+            closeMobileDrawer();
+          }
+        }
+      });
+
+      elements.form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const company = elements.inputCompany.value.trim();
+        const route = elements.inputRoute.value.trim();
+        const weight = Number(elements.inputWeight.value);
+        const duty = Math.max(0, Number(elements.inputDuty.value) || 0);
+        let valid = true;
+
+        elements.errCompany.hidden = true;
+        elements.errRoute.hidden = true;
+        elements.errWeight.hidden = true;
+
+        if (company.length < 3) {
+          elements.errCompany.textContent = "Lütfen en az 3 karakterlik firma adı girin.";
+          elements.errCompany.hidden = false;
+          valid = false;
+        }
+        if (!route.includes("→") && route.length < 5) {
+          elements.errRoute.textContent = "Çıkış ve varış noktasını girin (örn. Ambarlı → Hamburg).";
+          elements.errRoute.hidden = false;
+          valid = false;
+        }
+        if (!Number.isFinite(weight) || weight < 100) {
+          elements.errWeight.textContent = "Brüt ağırlık en az 100 kg olmalıdır.";
+          elements.errWeight.hidden = false;
+          valid = false;
+        }
+        if (!valid) return;
+
+        const parts = route.split(/→|->/);
+        const origin = (parts[0] || route).trim();
+        const dest = (parts[1] || "Hedef Terminali").trim();
+        const nextNum = 4083 + shipments.length;
+        const newId = "KZY-2611-" + nextNum;
+
+        shipments.unshift({
+          id: newId,
+          company: company,
+          route: route,
+          origin: origin,
+          dest: dest,
+          mode: elements.inputMode.value,
+          status: elements.inputStatus.value,
+          weightKg: weight,
+          dutyTry: duty,
+          updatedAt: "Şimdi",
+          updatedOrder: Date.now(),
+          hsCode: "8479.89 · 9700",
+          unitCode: "KZY-" + nextNum,
+          note: "Yeni sevkiyat kaydı oluşturuldu.",
+          timeline: [
+            { time: "Şimdi", text: "Beyanname operasyon kuyruğuna eklendi", active: true }
+          ]
+        });
+
+        state.selectedId = newId;
+        state.navView = "all";
+        state.statusFilter = "all";
+        elements.form.reset();
+        elements.inputWeight.value = "14200";
+        elements.inputDuty.value = "96500";
+        closeNewShipmentModal();
+        renderAll();
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>

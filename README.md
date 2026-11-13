@@ -22,7 +22,7 @@ Without explicit constraints, AI-generated UI converges on the same synthetic pa
    - **Desktop Applications** (Electron, Tauri, Qt, WinUI, SwiftUI, GTK — split panes, compact toolbars, status bars, `⌘K` workflows)
    - **Mobile Applications** (iOS, Android, React Native, Flutter — thumb-zone reachability, `SafeArea`, bottom sheets, `>= 44pt/48dp` targets)
    - **Video Game Interfaces** (HUDs, menus, inventories, dialogue — live-backdrop scrims, 5% safe zones, 10-foot/handheld scale, bespoke `<svg>` item silhouettes, mouse + gamepad dual navigation)
-3. **Automated Anti-Slop Stop Hook (`hooks.json` + `audit_ui_slop.mjs`)** — Scans UI files modified during a turn and flags measurable slop (`✨`/`🚀`/`📦` emoji crutches, `"Supercharge"`/`"Acme Corp"` placeholder copy, slate+indigo/purple gradients, `bg-clip-text` gradient headlines, `hover:scale-105` wobble, `<div onClick>`, missing `:focus-visible` rings, low-contrast `text-white` on bright amber/lime/cyan, multi-neon rainbow soup, missing custom `<svg>` art, unloaded HTML webfonts, or display-only fonts applied globally to `body`).
+3. **Automated Anti-Slop Stop Hook (`hooks.json` + `audit_ui_slop.mjs`)** — Scans UI files modified during a turn with multi-line JSX/HTML tag parsing and flags measurable slop (`✨`/`🚀`/`📦`/`🎉`/`💎` emoji crutches, `"Supercharge"`/`"Acme Corp"`/`"Lorem ipsum"` placeholder copy, slate+indigo/purple gradients, murky dark-green backgrounds, `bg-clip-text` gradient headlines, `hover:scale-105` wobble, `<div onClick>`, missing `:focus-visible` rings, low-contrast `text-white` on bright amber/lime/cyan, multi-neon rainbow soup, `leading-none` diacritic clipping, placeholder-only inputs, unlabeled icon buttons, nested-ternary JSX confusion, missing `alt`/`type`, missing custom `<svg>` art, unloaded HTML webfonts, or display-only fonts applied globally to `body`).
 
 ---
 
@@ -39,13 +39,18 @@ ui-design-craft/
 ├── skills/
 │   └── ui-design-craft/
 │       ├── SKILL.md
+│       ├── examples/
+│       │   └── sample-operations-console.html
 │       ├── references/
 │       │   ├── anti-slop-catalog.md
 │       │   ├── design-tokens-and-typography.md
 │       │   ├── layout-and-domain-archetypes.md
+│       │   ├── modern-engineering-and-research.md
 │       │   └── states-a11y-and-verification.md
 │       └── scripts/
 │           └── audit_ui_slop.mjs
+├── tests/
+│   └── audit_ui_slop.test.mjs
 └── assets/
     ├── icon.jpg
     ├── logo.png
@@ -79,7 +84,24 @@ Restart or start a new Antigravity conversation; the plugin is discovered automa
 You can also run the zero-dependency UI auditor manually against any file or project directory (requires Node.js):
 
 ```bash
-node skills/ui-design-craft/scripts/audit_ui_slop.mjs ./src
+node skills/ui-design-craft/scripts/audit_ui_slop.mjs --strict ./src
+node skills/ui-design-craft/scripts/audit_ui_slop.mjs --json ./src
+```
+
+Optional project configuration via `.uicraftrc.json`:
+
+```json
+{
+  "disabledRules": ["missing-custom-svg"],
+  "ignorePaths": ["src/legacy/"],
+  "allowFonts": ["Geist"]
+}
+```
+
+Run the plugin test suite:
+
+```bash
+node --test tests/audit_ui_slop.test.mjs
 ```
 
 ---

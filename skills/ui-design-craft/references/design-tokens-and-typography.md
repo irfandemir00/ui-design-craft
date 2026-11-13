@@ -25,10 +25,13 @@ neutral scale must carry a deliberate subtle undertone**:
 *   **Organic / Light Sage** (Climate, Health, Outdoor — light mode only):
     Canvas `#F5F6F3`, Surface `#FCFDFB`, Ink `#182019`
 
-*Never use raw `#000000` as a UI background, and never invent muddy dark-green
-(`#141b18`) or murky teal-black surfaces—keep dark mode neutrals clean, crisp,
-and low-chroma (`#0E1013`–`#1D2128`). Avoid stark `#FFFFFF` on long reading
-surfaces (`#FCFCFA` or `#FAF8F5` is far easier on the eye).*
+*Never use raw `#000000` (`bg-black`, `Colors.black`, `Color.black`) as a solid UI
+surface (alpha backdrop scrims such as `bg-black/70` or `rgba(0,0,0,0.65)` are
+acceptable), and never invent muddy dark-green (`#141b18`, `#0d1a14`,
+`bg-emerald-950`) or murky teal-black surfaces—keep dark mode neutrals clean,
+crisp, and low-chroma (`#0E1013`–`#1D2128`), or intentional warm espresso
+(`#12100E`). Avoid stark `#FFFFFF` on long reading surfaces (`#FCFCFA` or
+`#FAF8F5` is far easier on the eye).*
 
 ### Rule B: Strict 60-30-10 & Max-Hue Discipline
 
@@ -149,9 +152,10 @@ so accented characters never fall back to mismatched Arial glyphs:
 ### Rule C: Never Declare an Unloaded Webfont
 
 If you specify `'Plus Jakarta Sans'`, `'IBM Plex Sans'`, `'Newsreader'`, etc. in
-a web HTML/CSS project, **you MUST include the actual font import** (Google
-Fonts `<link>` with `&subset=latin,latin-ext` or local `@fontsource` import)
-with `display=swap`, plus clean fallbacks:
+a web HTML/CSS/React project, **you MUST include the actual font import** (Google
+Fonts `<link>` with `&subset=latin,latin-ext`, `@import url(...)`, local
+`@fontsource/*` package, or `next/font/google`) with `display=swap`, plus clean
+fallbacks:
 `font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;`
 
 ### Rule D: Weight Ladder & Optical Calibration

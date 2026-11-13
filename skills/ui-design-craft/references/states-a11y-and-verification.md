@@ -42,22 +42,32 @@ must handle:
 
 ## 2. Accessibility & Interaction Baseline
 
-*   **Semantic Elements**: Use `<button type="button">` for actions, `<a href>`
-    for navigation, `<main>`, `<nav>`, `<header>`, and real `<h1>–<h4>` heading
-    levels in strict descending order without skipping levels.
+*   **Semantic Elements, Spatial Hierarchy & Media**: Use `<button type="button">`
+    for actions, `<a href>` for navigation, `<main>`, `<nav>`, `<header>`, and
+    real `<h1>–<h4>` heading levels in strict descending order without skipping
+    levels. Mirror visual spatial groups in the accessibility tree using
+    `<section aria-labelledby>`, `<fieldset><legend>`, or `role="group"`, give
+    repeating cards distinguishing names/summaries (name + primary value), and
+    keep group structure stable across edits. Every `<img>` must carry `alt`
+    (`alt=""` if decorative).
+*   **Form Labels & Errors**: Every `<input>`, `<select>`, and `<textarea>` must
+    have a visible `<label htmlFor>` (or explicit `aria-label` for compact
+    search fields)—never rely on `placeholder` alone—and associate validation
+    messages via `aria-describedby`.
 *   **Contrast (WCAG AA)**:
     *   Body & UI text: `>= 4.5:1` against its actual background surface.
     *   Large display text (`>= 24px` or `>= 18.6px bold`), borders of active
         inputs, and meaningful icons: `>= 3.0:1`.
     *   Avoid low-contrast placeholder text (`#a1a1aa` on `#ffffff` fails AA if
         used for readable body/labels).
-*   **Keyboard & Focus**:
+*   **Keyboard, Focus & SVG A11y**:
     *   Every interactive element is reachable via `Tab` and clearly styled with
         `:focus-visible` (e.g., `2px` outline/ring with `2px` offset). Never
         use `outline: none` without a visible `:focus-visible` replacement.
     *   Modals/drawers trap focus cleanly, close on `Escape`, and restore focus
         to the trigger element on close.
-    *   Custom icon-only buttons always carry an explicit `aria-label`.
+    *   Custom icon-only buttons always carry an explicit `aria-label`, and
+        purely decorative inline `<svg>` icons carry `aria-hidden="true"`.
 *   **Motion Restraint**:
     *   Keep transitions fast (`120ms–200ms`) with `cubic-bezier(0.2, 0, 0, 1)`.
     *   Always include:
@@ -78,12 +88,21 @@ Before concluding any UI task, execute both layers of verification:
 
 ### A. Static Code & Copy Audit
 
-*   Confirm zero AI-slop relics (`✨`, `🚀`, `Sparkles`, *"Supercharge"*,
-    *"Seamless"*, *"Acme Corp"*, *"John Doe"*, unprompted purple/indigo gradients).
+*   Run `node <skill_dir>/scripts/audit_ui_slop.mjs --strict <path>` to check
+    modified UI files (`--json` available for CI pipelines).
+*   Confirm zero AI-slop relics (`✨`, `🚀`, `🎉`, `💎`, `Sparkles`, *"Supercharge"*,
+    *"Seamless"*, *"Acme Corp"*, *"John Doe"*, *"Lorem ipsum"*, unprompted
+    purple/indigo gradients, murky green-black backgrounds).
 *   Confirm all numeric columns, prices, percentages, and dates include
-    `tabular-nums`.
-*   Confirm flex/grid truncation uses `min-w-0` and buttons/inputs are semantic
-    HTML with `:focus-visible` styles.
+    `tabular-nums`, and headings/uppercase labels avoid `leading-none`.
+*   Confirm flex/grid truncation uses `min-w-0` and buttons/inputs/images use
+    semantic HTML (`type="button"`, `alt`, `<label>`, `:focus-visible`).
+*   **Spec-Driven Invariants & Anti-Satisficing Check**: Verify core user goals
+    end-to-end on the working artifact (not partial stubs). Check that no
+    requested feature was silently narrowed or downgraded, derive edge-case
+    checks directly from requirements (filter + sort composition, empty/error
+    recovery, persistence), and confirm zero duplicated logic or unintended
+    cross-module drift.
 *   Confirm typecheck/build/lint passes in the project if a build toolchain exists.
 
 ### B. Live Rendered Inspection (For Web Apps & HTML Pages)

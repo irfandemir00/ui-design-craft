@@ -46,8 +46,8 @@ characteristic AI-generated UI clichés.
 
 | AI Slop Pattern | Why It Looks Synthetic | Intentional Replacement |
 | :--- | :--- | :--- |
-| *"Supercharge your workflow"*, *"Unlock the power of..."*, *"Seamless"*, *"Next-gen"*, *"Elevate"*, *"Effortless"* | Empty filler that says nothing concrete about what the product does | State the concrete mechanism and outcome: *"Query 50M log lines in under 200ms"*, *"Automated VAT reconciliation for multi-currency invoices"* |
-| *"John Doe"*, *"Jane Smith"*, *"Acme Corp"*, *"test@example.com"* | Immediately exposes a synthetic mockup | Use realistic, culturally varied names, believable company names, and domain-accurate entities |
+| *"Supercharge your workflow"*, *"Unlock the power of..."*, *"Seamless"*, *"Next-gen"*, *"Elevate"*, *"Effortless"*, *"Revolutionize"*, *"AI-powered"*, *"Lorem ipsum"* | Empty filler that says nothing concrete about what the product does | State the concrete mechanism and outcome: *"Query 50M log lines in under 200ms"*, *"Automated VAT reconciliation for multi-currency invoices"* |
+| *"John Doe"*, *"Jane Smith"*, *"Acme Corp"*, *"test@example.com"*, *"foo@bar.com"* | Immediately exposes a synthetic mockup | Use realistic, culturally varied names, believable company names, and domain-accurate entities |
 | Hyper-symmetrical mock numbers (`+12.5%`, `+20.1%`, `$45,231.89`, `1,234`) | Looks fabricated at a glance | Mix realistic magnitudes, negative deltas (`-3.4%`), zero/empty cases, unrounded decimals, and varied timestamps (`14m ago`, `Nov 9, 08:42`) |
 | Explanatory filler subtitles under every obvious heading (`"Manage your team settings and preferences below"`) | Adds noise without helping the user | Omit self-evident subtitles; show useful metadata instead (e.g., `"4 active members · 1 pending invite"`) |
 
@@ -73,10 +73,16 @@ characteristic AI-generated UI clichés.
 
 ---
 
-## 7. Engineering & Layout Bugs Common in AI UI
+## 7. Engineering, Semantics & Form Bugs Common in AI UI
 
 *   **Missing `min-w-0` on flex/grid children**: Long titles or URLs blow out card widths or trigger horizontal page scroll. Always add `min-w-0` on flex/grid containers holding `truncate` text.
-*   **`<div onClick={...}>` instead of `<button>`**: Breaks keyboard navigation (`Tab`/`Enter`/`Space`) and screen readers. Always use native `<button type="button">`, `<a>`, or `<input>`.
+*   **`<div onClick={...}>` / `<span onClick={...}>` instead of `<button>`**: Breaks keyboard navigation (`Tab`/`Enter`/`Space`) and screen readers. Always use native `<button type="button">`, `<a href>`, or `<input>`.
+*   **`<button>` without explicit `type` inside or near forms**: Defaults to `type="submit"` in HTML, causing accidental form submissions. Always set `type="button"` for non-submitting buttons.
+*   **Icon-only `<button>` without `aria-label` or decorative `<svg>` without `aria-hidden="true"`**: Screen readers announce unlabeled buttons as `"button"` or read raw SVG paths.
+*   **`<img>` without `alt` attribute**: Provide meaningful `alt` text for informational images or `alt=""` for purely decorative imagery.
+*   **Placeholder-only `<input>` without visible `<label>`**: Disappears as soon as the user starts typing and causes severe accessibility-tree labeling debt. Always render a visible `<label htmlFor>` (or explicit `aria-label` in compact search bars).
+*   **Flat linear DOM for grouped spatial cards**: Screen-reader users lose visual grouping cues. Wrap functional groups in `<section aria-labelledby>`, `<fieldset><legend>`, or `role="group"`, and give repeating cards distinguishing accessible headings/summaries (name + key metric) instead of identical generic labels.
+*   **Nested ternary JSX soup (`a ? b : c ? d : e`) & duplicated component logic ("Atoms of Confusion")**: Impairs both human review and LLM maintenance. Use early returns, explicit lookup maps, or small named helper components.
 *   **Hidden focus states (`outline-none` without replacement)**: Always pair `focus:outline-none` with a clear `focus-visible:ring-2 focus-visible:ring-offset-2` ring.
 *   **Over-eager sticky/fixed headers without scroll padding**: Overlapping anchors or eating 25% of mobile viewport height. Keep mobile headers compact (`52–56px`) and set `scroll-margin-top`.
 

@@ -58,8 +58,10 @@ Identify the target medium first and respect its native idioms:
 
 Before writing UI code, lock in five concrete decisions:
 
-1.  **User / Player & Core Task**: What must the user or player read, decide, or
-    act on in under 3 seconds?
+1.  **User / Player & Core Acceptance Contract**: What must the user or player
+    read, decide, or act on in under 3 seconds, and what **end-to-end
+    acceptance criteria** must hold across the single working artifact (no
+    partial/stubbed happy-path views)?
 2.  **Aesthetic Thesis (Pick ONE aligned with medium & domain)**:
     *   *Web / SaaS*: Warm Editorial (Paper & Ink), Tactile Calm SaaS, Crisp
         Utility, or Monochrome + Single Signal Accent.
@@ -97,56 +99,87 @@ Consult the deep references matched to your task:
 *   **Tokens, Color, Contrast & Typography**: [Design Tokens & Typography](./references/design-tokens-and-typography.md)
 *   **Domain & Platform Architectures**: [Layout & Domain Archetypes](./references/layout-and-domain-archetypes.md)
 *   **States, Accessibility, Input Parity & QA**: [States, A11y & Verification](./references/states-a11y-and-verification.md)
+*   **Modern Research & Engineering Craft (2025–2026)**: [Modern Engineering & Research](./references/modern-engineering-and-research.md)
 
 #### Non-Negotiable Red Lines (Never Ship These)
 
 1.  **No AI Color Clichés, Murky Tints, or Neon Rainbow Overload**: Never default
-    to `#0f172a` + indigo/purple/pink gradients, raw `#000000`, murky
-    green-black/brown-black midtones, muddy neon boxes (`bg-purple-500/20`),
+    to `#0f172a` + indigo/purple/pink gradients (Tailwind or raw CSS), raw
+    `#000000` / `bg-black` / `Colors.black` / `Color.black` surfaces (alpha
+    backdrop scrims like `bg-black/70` excluded), murky green-black/brown-black
+    midtones (`#141b18`, `bg-emerald-950`), muddy neon boxes (`bg-purple-500/20`),
     or `text-white` on bright yellow/amber/lime/cyan/emerald-400. Never mix 3+
-    saturated neon status/rarity colors (`#4ade80` + `#38bdf8` + `#fb7185` +
-    `#e09f3e`) on one screen—keep secondary tags understated and tonal.
+    saturated neon status/rarity colors (hex or Tailwind `*-400/500`) on one
+    screen—keep secondary tags understated and tonal.
 2.  **No Typography Slop or Unloaded Fonts**: Never use unstyled Arial/Times,
-    blind `Inter`+`font-bold` monotony, or display/fantasy/sci-fi fonts on
-    long body copy or dense tables. Never declare a webfont without actually
-    importing it (`<link>` / `@import` / `@fontsource`), and never clip Turkish
-    diacritics (`İ, Ş, Ğ`) with `leading-none`.
+    `font-bold` (`700`) monotony on every heading/button (use `400/500/600`
+    contrast), or display/fantasy/sci-fi fonts on long body copy or dense tables.
+    Never declare a webfont without actually importing it (`<link>`, `@import`,
+    `@fontsource`, or `next/font`), and never clip Turkish diacritics (`İ, Ş, Ğ,
+    Ü, Ö, Ç`) with `leading-none` / `line-height: 1` on headings or uppercase
+    labels (keep `>= 1.12` / `>= 1.25`). Constrain prose to `55ch–68ch`.
 3.  **No "Carditis" or Cluttered Non-UX Layouts**: Never stack bordered boxes
     inside bordered boxes, duplicate the same items in stacked sections, or
     pollute user-facing headers with QA/debug state-simulator buttons. Use open
     canvases, clean split panes with `1px` hairline dividers, clear visual
     focal priority, and generous breathing room.
 4.  **Write Bespoke Inline `<svg>` Icons & Silhouettes (No Text-Only Stubs or Emojis)**:
-    Never use `✨`, `🚀`, `⚡`, Unicode icon surrogates (`📦`, `🛡️`), or
-    bare text-only rectangles where visual recognition helps. Author clean,
-    bespoke inline `<svg>` icons and domain silhouettes (e.g., item/weapon/armor
-    art, nav glyphs, empty-state linework) using `currentColor` and consistent
-    `stroke-width: 1.5–1.75`. Never put rainbow pastel badges around icons.
-5.  **No Buzzword Copy or Toy Data**: Banish *"Supercharge"*, *"Seamless"*,
-    *"Elevate"*, *"Next-gen"*, *"Acme Corp"*, *"John Doe"*, and synthetic
-    `+20.1%` filler stats. Use domain-authentic copy and varied, realistic data.
-6.  **No Broken Numeric Alignment**: Every price, counter, KPI, HP/timer/score,
+    Never use `✨`, `🚀`, `⚡`, `🎉`, `💎`, Unicode icon surrogates (`📦`, `🛡️`),
+    `<Sparkles>`, or bare text-only rectangles where visual recognition helps.
+    Author clean, bespoke inline `<svg>` icons and domain silhouettes (e.g.,
+    item/weapon/armor art, nav glyphs, empty-state linework) using
+    `currentColor`, consistent `stroke-width: 1.5–1.75`, `aria-hidden="true"`
+    when decorative, and `aria-label` on icon-only buttons. Never put rainbow
+    pastel badges around icons.
+5.  **No Semantic, Spatial-A11y, Form, or Motion Shortcuts**: Never use
+    `<div onClick>` / `<span onClick>` instead of `<button type="button">` /
+    `<a href>`, never use `outline-none` without a paired `focus-visible` ring,
+    never omit `alt` on `<img>`, never build placeholder-only inputs without
+    `<label>` or `aria-label`, never ship unlabeled icon-only buttons, never
+    flatten visual groups into unstructured linear DOM (use `<section
+    aria-labelledby>`, `<fieldset>`, and distinguishing item summaries), never
+    use sluggish `duration-500`/`duration-700` transitions (`100ms–200ms`), and
+    never add `@keyframes` without `@media (prefers-reduced-motion: reduce)`.
+6.  **No Buzzword Copy or Toy Data**: Banish *"Supercharge"*, *"Seamless"*,
+    *"Elevate"*, *"Next-gen"*, *"Revolutionize"*, *"AI-powered"*, *"Acme Corp"*,
+    *"John Doe"*, *"Lorem ipsum"*, and synthetic `+20.1%` filler stats. Use
+    domain-authentic copy and varied, realistic data.
+7.  **No Broken Numeric Alignment**: Every price, counter, KPI, HP/timer/score,
     percentage, and table number must use `tabular-nums`.
-7.  **No Medium Mismatch**:
-    *   Desktop apps must not look like oversized web landing pages.
-    *   Mobile apps must not cram desktop tables or put key actions out of thumb reach.
-    *   Game UIs must not look like Tailwind SaaS cards, clutter center-screen
+8.  **No Medium Mismatch**:
+    *   Desktop apps (`28–36px` toolbar controls, `800×600` min resize, `Ctrl/Cmd+K`)
+        must not look like oversized web landing pages.
+    *   Mobile apps (`>= 44pt/48dp` targets, `SafeArea`, `>= 16px` inputs to
+        prevent iOS zoom) must not cram desktop tables or put key actions out of
+        thumb reach.
+    *   Game UIs (`5%` title-safe margin, scrims over gameplay, `>= 18–22px`
+        1080p copy) must not look like Tailwind SaaS cards, clutter center-screen
         gameplay, or break gamepad/D-pad focus navigation.
-8.  **No Single-State Prototypes**: Every view must handle empty, loading,
-    error, long-text truncation (`min-w-0`), keyboard/gamepad focus, and
-    target viewport/aspect-ratio scaling.
+9.  **No Single-State Prototypes, Silent Scope-Dropping, or Confusing Code**:
+    Every view must handle empty, loading, error, long-text truncation
+    (`min-w-0` + `truncate`), keyboard/gamepad focus, and target viewport
+    scaling. Never commit *specification satisficing* (quietly downgrading or
+    dropping requested interactivity) or write nested-ternary JSX soup; keep
+    architecture/tokens and code co-evolving cleanly without duplicate logic.
 
 ### Phase 4: Self-Audit & Visual Verification
 
 Before declaring any UI work done:
 
 1.  **Automated Slop Scan & Code Review**: Run
-    [audit_ui_slop.mjs](./scripts/audit_ui_slop.mjs) (`node <skill_dir>/scripts/audit_ui_slop.mjs <path>`)
-    on created/modified UI files and audit against the red lines above; strip
-    excess card wrappers, dead handlers, toy copy, and uncalibrated shadows.
-2.  **Layout & Overflow Check**: Check truncation (`min-w-0`), aspect ratios,
+    [audit_ui_slop.mjs](./scripts/audit_ui_slop.mjs)
+    (`node <skill_dir>/scripts/audit_ui_slop.mjs --strict <path>`, or `--json`
+    for CI/tooling) on created/modified UI files and audit against the red lines
+    above. Use `ui-craft-ignore` (line) or `ui-craft-ignore-file` (file) only
+    for justified exceptions, or project-level `.uicraftrc.json` (`disabledRules`,
+    `ignorePaths`, `allowFonts`). Strip excess card wrappers, dead handlers,
+    toy copy, and uncalibrated shadows.
+2.  **Anti-Satisficing, Invariant & Scope Diff Check**: Re-check the final
+    artifact against every requirement in the prompt (spec-driven invariants,
+    end-to-end flows, zero duplicated logic or unintended module drift).
+3.  **Layout & Overflow Check**: Check truncation (`min-w-0`), aspect ratios,
     safe-area/overscan margins, and narrow/resized extremes.
-3.  **Live Visual & Input Inspection**: Inspect rendered output using the
+4.  **Live Visual & Input Inspection**: Inspect rendered output using the
     verification steps in [States, A11y & Verification](./references/states-a11y-and-verification.md)
     (desktop + mobile viewports for web/mobile, window resize & keyboard pass
     for desktop, background-contrast & controller-focus pass for game UI).
